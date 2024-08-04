@@ -1,13 +1,9 @@
-import { balanceTeams, teamBlue, teamRed } from "../utils/balance-teams"
+import { checkTeamsIsCorrect, teamBlue, teamRed } from "../utils/check-teams"
+import { getSpectatorsPlayers } from "../utils/utils-functions"
 
 export const playerLeaveHandler = (
     room: RoomObject, player: PlayerObject
 ) => {
-
-    let spectatorPlayers: Array<PlayerObject> = room
-        .getPlayerList()
-        .filter(p => p.team === 0)
-    spectatorPlayers.splice(0, 1)
 
     if(player.team !== 0) {
         if (player.team === 1) {
@@ -18,11 +14,6 @@ export const playerLeaveHandler = (
             teamBlue.splice(index, 1)
         }
     }
-
-    if (spectatorPlayers.length > 1) {
-        console.log('chooseMode')
-        return;
-    }
-    balanceTeams(room)
-
+    checkTeamsIsCorrect(room)
+    
 }

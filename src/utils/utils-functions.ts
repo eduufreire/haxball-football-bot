@@ -1,3 +1,6 @@
+import { CONFIG } from "../../config";
+import { teamBlue, teamRed } from "./check-teams";
+
 /**
  * @description return spectators in queue, ignoring `Player Bot`
  * @param room: RoomObject
@@ -36,4 +39,10 @@ export function showPlayersInTheQueue(idPlayer: number, room: RoomObject) {
     1
   );
   room.sendAnnouncement(message, idPlayer, 0xe8a157, "bold", 1);
+}
+
+export function getMissingPlayers() {
+  let totalPlayersInTheTwoTeams = teamRed.length + teamBlue.length;
+  let missingPlayersTeams = CONFIG.TOTAL_PLAYERS - totalPlayersInTheTwoTeams;
+  return missingPlayersTeams;
 }

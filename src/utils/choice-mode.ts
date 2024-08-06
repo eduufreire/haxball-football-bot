@@ -1,6 +1,6 @@
 import { CONFIG } from "../../config";
-import { teamRed, teamBlue, checkTeamsIsCorrect } from "./check-teams";
-import { getSpectatorsPlayers, showPlayersInTheQueue } from "./utils-functions";
+import { teamRed, teamBlue } from "./check-teams";
+import { getMissingPlayers, getSpectatorsPlayers, showPlayersInTheQueue } from "./utils-functions";
 
 export function playerChoiceMode(
   room: RoomObject,
@@ -10,14 +10,14 @@ export function playerChoiceMode(
 
   let spectatorPlayers = getSpectatorsPlayers(room);
 
-  let index = parseInt(msg);
-  if (index < 0 || index > spectatorPlayers.length) {
+  let indexPlayer = parseInt(msg);
+  if (indexPlayer < 0 || indexPlayer > spectatorPlayers.length) {
     room.sendAnnouncement("Número inválido, digite novamente", player.id);
     showPlayersInTheQueue(player.id, room)
     return false;
   }
 
-  let chosenPlayer = spectatorPlayers[index - 1];
+  let chosenPlayer = spectatorPlayers[indexPlayer - 1];
   if (teamRed.length < teamBlue.length) {
     room.setPlayerTeam(chosenPlayer.id, 1);
     teamRed.push(chosenPlayer.id);
@@ -26,9 +26,8 @@ export function playerChoiceMode(
     teamBlue.push(chosenPlayer.id);
   }
 
-  let totalPlayersInTheTwoTeams = teamRed.length + teamBlue.length;
-  let missingPlayersTeams = CONFIG.TOTAL_PLAYERS - totalPlayersInTheTwoTeams;
-  if (missingPlayersTeams === 0) {
+  let missingPlayers = getMissingPlayers()
+  if (missingPlayers === 0) {
     room.pauseGame(false);
     CONFIG.GAME_PAUSED = false;
     CONFIG.NEED_PLAYER_IN_TEAM = false;

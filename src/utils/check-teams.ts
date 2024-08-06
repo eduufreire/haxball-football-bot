@@ -1,20 +1,18 @@
 import { CONFIG } from "../../config";
-import { getSpectatorsPlayers, showPlayersInTheQueue } from "./utils-functions";
+import { getMissingPlayers, getSpectatorsPlayers, showPlayersInTheQueue } from "./utils-functions";
 
 export let teamRed: Array<number> = [];
 export let teamBlue: Array<number> = [];
 
 export const checkTeamsIsCorrect = (room: RoomObject) => {
   let spectatorPlayers = getSpectatorsPlayers(room);
+  let missingPlayers = getMissingPlayers()
 
-  let totalPlayersInTheTwoTeams = teamRed.length + teamBlue.length;
-  let missingPlayersTeams = CONFIG.TOTAL_PLAYERS - totalPlayersInTheTwoTeams;
-
-  if (totalPlayersInTheTwoTeams === 0) {
+  if (missingPlayers === CONFIG.TOTAL_PLAYERS) {
     room.startGame();
   }
 
-  let checkIfGoesIntoChoiceMode = missingPlayersTeams > 0 && spectatorPlayers.length > missingPlayersTeams
+  let checkIfGoesIntoChoiceMode = missingPlayers > 0 && spectatorPlayers.length > missingPlayers
   if (checkIfGoesIntoChoiceMode) {
     room.pauseGame(true);
     CONFIG.GAME_PAUSED = true;
@@ -24,26 +22,25 @@ export const checkTeamsIsCorrect = (room: RoomObject) => {
     return;
   }
 
-  if (totalPlayersInTheTwoTeams < CONFIG.TOTAL_PLAYERS) {
-    let distributeSpectatorsInTwoTeams =
-      spectatorPlayers.length < missingPlayersTeams
-        ? spectatorPlayers.length
-        : missingPlayersTeams;
+  let distributeSpectatorsInTwoTeams =
+    spectatorPlayers.length < missingPlayers
+      ? spectatorPlayers.length
+      : missingPlayers;
 
-    for (var i = 0; i < distributeSpectatorsInTwoTeams; i++) {
-      let playerId = spectatorPlayers[i].id;
+  for (var i = 0; i < distributeSpectatorsInTwoTeams; i++) {
+    let playerId = spectatorPlayers[i].id;
 
-      if (teamRed.length < teamBlue.length) {
-        room.setPlayerTeam(playerId, 1);
-        teamRed.push(playerId);
-      } else if (teamRed.length === teamBlue.length) {
-        room.setPlayerTeam(playerId, 1);
-        teamRed.push(playerId);
-      } else {
-        room.setPlayerTeam(playerId, 2);
-        teamBlue.push(playerId);
-      }
+    if (teamRed.length < teamBlue.length) {
+      room.setPlayerTeam(playerId, 1);
+      teamRed.push(playerId);
+    } else if (teamRed.length === teamBlue.length) {
+      room.setPlayerTeam(playerId, 1);
+      teamRed.push(playerId);
+    } else {
+      room.setPlayerTeam(playerId, 2);
+      teamBlue.push(playerId);
     }
-    return;
   }
+  return;
+  
 };

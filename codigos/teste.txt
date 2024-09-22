@@ -1,0 +1,46 @@
+
+  let rgb = [
+    {
+      MainColor: [0x0080ff, 0x004077, 0x002033],
+      AvatarColor: 0xFFFFFF,
+      Angle: 60,
+      Team: 1,
+    },
+    {
+      MainColor: [0x004077, 0x002033, 0x0080ff],
+      AvatarColor: 0xFFFFFF,
+      Angle: 60,
+      Team: 1,
+    },
+    {
+      MainColor: [0x002033,  0x0080ff, 0x004077],
+      AvatarColor: 0xFFFFFF,
+      Angle: 60,
+      Team: 1,
+    }
+  ]
+
+  enum TeamID {
+    Spectators = 0,
+    Red = 1,
+    Blue = 2
+  }
+
+  function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  let outro = 0;
+  room.onGameStart = async (player) => {
+    let teste = setInterval(() => {
+      let uni = rgb[outro]
+      let id: TeamID = uni.Team
+      room.setTeamColors(1, uni.Angle, uni.AvatarColor, uni.MainColor)
+      if(outro == 2) {
+        outro = 0
+      } else {
+        outro++;
+      }
+    }, 1000)
+  }
+

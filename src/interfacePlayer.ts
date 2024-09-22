@@ -1,3 +1,0 @@
-interface Player extends PlayerObject {
-    
-}

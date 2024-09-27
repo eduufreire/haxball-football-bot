@@ -1,3 +1,4 @@
+import { GLOBALS } from "../config";
 import { noGoalStadium } from "../stadiums/noGoalStadium";
 
 export class Room {
@@ -18,11 +19,14 @@ export class Room {
 
     private static configRoom(): void {
         this.room.setCustomStadium(JSON.stringify(noGoalStadium));
+        GLOBALS.IS_STADIUM_MAIN = false
+
         this.room.setScoreLimit(3);
         this.room.setTimeLimit(3);
         this.room.setTeamsLock(true);
 
         this.room.onRoomLink = (link) => console.log(link);
+        this.room.startGame();
     }
 
     public static getPlayers(): Array<PlayerObject> {

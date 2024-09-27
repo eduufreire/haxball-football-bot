@@ -1,4 +1,4 @@
-export const stadium = {
+export const mainStadium = {
     "name": "4v4 by Pagus futbol soccer from HaxMaps",
     "width": 850,
     "height": 350,

@@ -13,7 +13,6 @@ HaxballJS.then(
             public: false,
             noPlayer: false,
             token: GLOBALS.TOKEN,
-            geo: { lat: -23.6283, lon: -46.6409, code: "br" },
         });
 
         Room.setRoom(room);

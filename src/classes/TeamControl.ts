@@ -21,26 +21,31 @@ export class TeamControl {
         return this.teamRed.length + this.teamBlue.length;
     }
 
-
-    removePlayers() {
+    autoRemovePlayers() {
         let playersInMatch = this.getPlayersInMatch();
-        for (var i = 0; i < playersInMatch; i++) {
-            let index: number | undefined;
-            if (this.teamRed.length > this.teamBlue.length) {
-                index = this.teamRed.pop();
-            } else if (this.teamBlue.length > this.teamRed.length) {
-                index = this.teamBlue.pop();
-            }
+        let missingPlayers = this.getMissingPlayersFromMatch();
+        let playesInTheRoom = this.getActivePlayersInQueue().length;
 
-            if(index){
-                this.room.setPlayerTeam(index, 0);
+        if(playersInMatch % 2 != 0 && playesInTheRoom <= missingPlayers) {
+            for (var i = 0; i < playersInMatch; i++) {
+                let index: number | undefined;
+                if (this.teamRed.length > this.teamBlue.length) {
+                    index = this.teamRed.pop();
+                } else if (this.teamBlue.length > this.teamRed.length) {
+                    index = this.teamBlue.pop();
+                }
+    
+                if(index){
+                    this.room.setPlayerTeam(index, 0);
+                }
             }
         }
     }
 
 
-    addPlayers() {
+    autoAddPlayers() {
         let playersInQueue = this.getActivePlayersInQueue();
+
         for (var i = 0; i < playersInQueue.length; i++) {
 
             let playerId = playersInQueue[i].id;
@@ -60,8 +65,29 @@ export class TeamControl {
             }
 
             this.room.setPlayerTeam(playerId, numberTeam);
-
-
         }
     }
+
+    verifyPlayerTeamAndRemove(numberTeamPlayer: number, idPlayer: number): boolean {
+        let index: number;
+        let removed= false;;
+        switch(numberTeamPlayer) {
+            case 1:
+                index = this.teamRed.indexOf(idPlayer)
+                this.teamRed.splice(index, 1);
+                removed = true;
+                break;
+
+            case 2:
+                index = this.teamBlue.indexOf(idPlayer)
+                this.teamBlue.splice(index, 1);
+                removed = true;
+                break;
+
+            case 0:
+                break;
+        }
+        return removed;
+    }
+
 }

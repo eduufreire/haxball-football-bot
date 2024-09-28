@@ -26,7 +26,7 @@ export class TeamControl {
         let missingPlayers = this.getMissingPlayersFromMatch();
         let playesInTheRoom = this.getActivePlayersInQueue().length;
 
-        if(playersInMatch % 2 != 0 && playesInTheRoom <= missingPlayers) {
+        if(playersInMatch % 2 != 0 && playesInTheRoom == 0) {
             for (var i = 0; i < playersInMatch; i++) {
                 let index: number | undefined;
                 if (this.teamRed.length > this.teamBlue.length) {
@@ -34,8 +34,8 @@ export class TeamControl {
                 } else if (this.teamBlue.length > this.teamRed.length) {
                     index = this.teamBlue.pop();
                 }
-    
-                if(index){
+                
+                if (index) {
                     this.room.setPlayerTeam(index, 0);
                 }
             }
@@ -46,25 +46,32 @@ export class TeamControl {
     autoAddPlayers() {
         let playersInQueue = this.getActivePlayersInQueue();
 
-        for (var i = 0; i < playersInQueue.length; i++) {
+        if(
+            (this.getPlayersInMatch() < 2) ||
+            playersInQueue.length >= this.getMissingPlayersFromMatch()
+        ) {
 
-            let playerId = playersInQueue[i].id;
-            let numberTeam = CONSTANTS.TEAMS.SPEC;
-        
-            if (this.teamRed.length < this.teamBlue.length) {
-                numberTeam = CONSTANTS.TEAMS.RED;
-                this.teamRed.push(playerId);
+            for (var i = 0; i < playersInQueue.length; i++) {
 
-            } else if (this.teamRed.length === this.teamBlue.length) {
-                numberTeam = CONSTANTS.TEAMS.RED;
-                this.teamRed.push(playerId);
-
-            } else {
-                numberTeam = CONSTANTS.TEAMS.BLUE
-                this.teamBlue.push(playerId);
+                let playerId = playersInQueue[i].id;
+                let numberTeam = CONSTANTS.TEAMS.SPEC;
+            
+                if (this.teamRed.length < this.teamBlue.length) {
+                    numberTeam = CONSTANTS.TEAMS.RED;
+                    this.teamRed.push(playerId);
+    
+                } else if (this.teamRed.length === this.teamBlue.length) {
+                    numberTeam = CONSTANTS.TEAMS.RED;
+                    this.teamRed.push(playerId);
+    
+                } else {
+                    numberTeam = CONSTANTS.TEAMS.BLUE
+                    this.teamBlue.push(playerId);
+                }
+    
+                this.room.setPlayerTeam(playerId, numberTeam);
             }
 
-            this.room.setPlayerTeam(playerId, numberTeam);
         }
     }
 

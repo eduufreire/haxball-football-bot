@@ -4,20 +4,18 @@ import { GLOBALS } from "../config";
 
 export default function playerChat() {
   let room = Room.getRoom();
-  let teste =new GameControl();
+  let gameControl = new GameControl();
 
   room.onPlayerJoin = (player) => {
-    console.log(player.name)
-    teste.controlPlayersAtMatch()
+    gameControl.controlPlayersAtMatch()
   }
 
   room.onPlayerLeave = (player) => {
-    teste.playerLeft(player);
+    gameControl.playerLeft(player);
   }
 
   room.onGamePause = (byPlayer) => {
     GLOBALS.GAME_PAUSED = true
-    console.log('pausou 1')
   }
 
   room.onGameUnpause = (byPlayer) => {
@@ -30,10 +28,7 @@ export default function playerChat() {
 
   room.onGameStop = (byPlayer) => {
     GLOBALS.GAME_PAUSED = true
-    if(!GLOBALS.IS_STADIUM_MAIN) {
-      teste.changeStadium()
-    }
-    teste.controlPlayersAtMatch()
+    gameControl.controlPlayersAtMatch()
   }
 
   room.onPlayerChat = (player, msg) => {

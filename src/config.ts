@@ -1,5 +1,5 @@
 export const GLOBALS = {
-    TOKEN: "thr1.AAAAAGb16i8LReccoDh5fQ.SfiOEVTU-rs",
+    TOKEN: "thr1.AAAAAGb3X2BmVy-zWnMhKg.xu7VYGV5A0E",
     TOTAL_PLAYERS: 4,
     NEED_PLAYER_IN_TEAM: false,
     GAME_PAUSED: false, 

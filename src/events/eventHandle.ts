@@ -7,11 +7,11 @@ export default function playerChat() {
   let gameControl = new GameControl();
 
   room.onPlayerJoin = (player) => {
-    gameControl.controlPlayersAtMatch()
+    gameControl.gameHandler()
   }
 
   room.onPlayerLeave = (player) => {
-    gameControl.playerLeft(player);
+    gameControl.controlAfterPlayerLeft(player);
   }
 
   room.onGamePause = (byPlayer) => {
@@ -28,7 +28,7 @@ export default function playerChat() {
 
   room.onGameStop = (byPlayer) => {
     GLOBALS.GAME_PAUSED = true
-    gameControl.controlPlayersAtMatch()
+    gameControl.gameHandler()
   }
 
   room.onPlayerChat = (player, msg) => {

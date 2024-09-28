@@ -5,75 +5,82 @@ import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
 export class GameControl {
-
-    private timer: NodeJS.Timeout | null = null
     
     constructor(
         private room: RoomObject = Room.getRoom(),
         private teamControl = new TeamControl(),
+        private timer: NodeJS.Timeout | null = null
     ) { }
 
-    controlPlayersAtMatch() {
+    gameHandler() {
         let playersInQueue = this.teamControl.getActivePlayersInQueue().length;
         let missingPlayers = this.teamControl.getMissingPlayersFromMatch();
 
         if (missingPlayers > 0 && playersInQueue <= missingPlayers) {
             this.teamControl.autoAddPlayers();
+            this.startTimerLoop()
             this.changeStadium()
-            this.startTimer()
         }
 
         if(missingPlayers === 0) {
-            this.stopTimer()
+            this.stopTimerLoop()
             this.changeStadium()
         }
+
     }
 
-    playerLeft(player: PlayerObject) {
+    enablePlayerChoiceMode() {
+        this.room.pauseGame(true)
+        GLOBALS.NEED_PLAYER_IN_TEAM = true;
+        this.teamControl.showPlayersActivesForChoice()
+    }
+
+    controlAfterPlayerLeft(player: PlayerObject) {
         let wasRemoved = this.teamControl.verifyPlayerTeamAndRemove(player.team, player.id);
         let playersInQueue = this.teamControl.getActivePlayersInQueue().length;
         let missingPlayers = this.teamControl.getMissingPlayersFromMatch();
 
         if (wasRemoved && playersInQueue > missingPlayers) {
-            this.room.pauseGame(true)
+            this.enablePlayerChoiceMode()
+            return;
         } else {
             this.teamControl.autoRemovePlayers();
         }
 
-        this.controlPlayersAtMatch()
+        console.log('passou')
+        this.gameHandler()
+    }
+
+    changeStadium() {
+        let playersAtMatch = this.teamControl.getPlayersInMatch()
+        if (playersAtMatch === 4 && !GLOBALS.IS_STADIUM_MAIN) {
+            this.restartGame()
+            this.room.setCustomStadium(JSON.stringify(mainStadium))
+            GLOBALS.IS_STADIUM_MAIN = true
+        } else if (playersAtMatch < 4 && GLOBALS.IS_STADIUM_MAIN){
+            this.restartGame()
+            this.room.setCustomStadium(JSON.stringify(noGoalStadium))
+            GLOBALS.IS_STADIUM_MAIN = false
+        } 
     }
 
 
-    startTimer() {
+    private startTimerLoop() {
         if(this.timer === null) {
             let contador = 0
             this.timer = setInterval(() => {
                 console.log(`timer rodando ${contador++}`)
-                this.controlPlayersAtMatch()
+                this.gameHandler()
             }, 1500)
         }
     }
 
-    stopTimer() {
+    private stopTimerLoop() {
         if(this.timer != null) {
             console.log('parando')
             clearInterval(this.timer);
             this.timer = null;
         }
-    }
-
-
-    changeStadium() {
-        let playersNoCampo = this.teamControl.getPlayersInMatch()
-        if (playersNoCampo === 4 && !GLOBALS.IS_STADIUM_MAIN) {
-            this.restartGame()
-            this.room.setCustomStadium(JSON.stringify(mainStadium))
-            GLOBALS.IS_STADIUM_MAIN = true
-        } else if (playersNoCampo < 4 && GLOBALS.IS_STADIUM_MAIN){
-            this.restartGame()
-            this.room.setCustomStadium(JSON.stringify(noGoalStadium))
-            GLOBALS.IS_STADIUM_MAIN = false
-        } 
     }
 
 

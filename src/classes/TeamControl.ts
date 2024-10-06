@@ -1,3 +1,4 @@
+import { GLOBALS } from "../config";
 import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
 
@@ -7,6 +8,17 @@ export class TeamControl {
     private teamRed: Array<number> = [],
     private teamBlue: Array<number> = []
   ) {}
+
+  addPlayerTeam(id: number, team: number) {
+    switch(team) {
+      case 1:
+        this.teamRed.push(id)
+        break;
+      case 2:
+        this.teamBlue.push(id)
+        break;
+    }
+  }
 
   getActivePlayersInQueue(): Array<PlayerObject> {
     // TODO: futuramente, aplicar filtro também para pessoas ausentes
@@ -21,52 +33,32 @@ export class TeamControl {
     return this.teamRed.length + this.teamBlue.length;
   }
 
-  autoRemovePlayers() {
-    let playersInMatch = this.getPlayersInMatch();
-    let missingPlayers = this.getMissingPlayersFromMatch();
-    let playesInTheRoom = this.getActivePlayersInQueue().length;
-
-    if (playersInMatch % 2 != 0 && playesInTheRoom == 0) {
-      for (var i = 0; i < playersInMatch; i++) {
-        let index: number | undefined;
-        if (this.teamRed.length > this.teamBlue.length) {
-          index = this.teamRed.pop();
-        } else if (this.teamBlue.length > this.teamRed.length) {
-          index = this.teamBlue.pop();
-        }
-
-        if (index) {
-          this.room.setPlayerTeam(index, 0);
-        }
-      }
-    }
+  upadteIdCaptains() {
+    GLOBALS.CAPTAINS.RED = this.teamRed[0]
+    GLOBALS.CAPTAINS.BLUE = this.teamBlue[0]
   }
 
+  
   autoAddPlayers() {
     let playersInQueue = this.getActivePlayersInQueue();
 
     if (
-      this.getPlayersInMatch() < 2 ||
-      playersInQueue.length >= this.getMissingPlayersFromMatch()
+      this.getPlayersInMatch() < 4 &&
+      playersInQueue.length <= this.getMissingPlayersFromMatch() 
     ) {
       for (var i = 0; i < playersInQueue.length; i++) {
+        console.log(i)
         let playerId = playersInQueue[i].id;
-        let numberTeam = CONSTANTS.TEAMS.SPEC;
-
-        if (this.teamRed.length < this.teamBlue.length) {
-          numberTeam = CONSTANTS.TEAMS.RED;
+        if (this.teamRed.length <= this.teamBlue.length) {
           this.teamRed.push(playerId);
-        } else if (this.teamRed.length === this.teamBlue.length) {
-          numberTeam = CONSTANTS.TEAMS.RED;
-          this.teamRed.push(playerId);
-        } else {
-          numberTeam = CONSTANTS.TEAMS.BLUE;
+          this.room.setPlayerTeam(playerId, 1);
+        } else if (this.teamBlue.length < this.teamRed.length) {
           this.teamBlue.push(playerId);
-        }
-
-        this.room.setPlayerTeam(playerId, numberTeam);
+          this.room.setPlayerTeam(playerId, 2);
+        } 
       }
     }
+
   }
 
   verifyPlayerTeamAndRemove(
@@ -111,10 +103,7 @@ export class TeamControl {
         ? this.teamRed[0]
         : this.teamBlue[0];
 
-    console.table(this.room.getPlayerList())
-    console.log(this.teamBlue)
-    console.log(idTeamCaptain)
-
     this.room.sendAnnouncement(message, idTeamCaptain, 0xe8a157, "bold", 1);
   }
+
 }

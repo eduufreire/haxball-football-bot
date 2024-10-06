@@ -1,12 +1,11 @@
 export const GLOBALS = {
-    TOKEN: "thr1.AAAAAGb3X2BmVy-zWnMhKg.xu7VYGV5A0E",
+    TOKEN: "thr1.AAAAAGcB-N2QnLHZj1akZQ.OkiFQlsuS_Q",
     TOTAL_PLAYERS: 4,
-    NEED_PLAYER_IN_TEAM: false,
+    CHOOSE_MODE: false,
     GAME_PAUSED: false, 
     IS_STADIUM_MAIN: false,
-    TEAMS_ID: {
-        SPEC: 0,
-        RED: 1,
-        BLUE: 2
+    CAPTAINS: {
+        RED: 0,
+        BLUE: 0
     }
 }

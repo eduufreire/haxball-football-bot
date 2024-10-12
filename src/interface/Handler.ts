@@ -1,3 +1,8 @@
 export interface Handler {
-    handlerGame(): void
+    handler(): void
+}
+
+export type TeamCaptains = {
+    redID: number;
+    blueID: number;
 }

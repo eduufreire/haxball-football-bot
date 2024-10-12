@@ -14,7 +14,7 @@ export class Timer {
         let contador = 0
         this.timer = setInterval(() => {
             console.log(`timer rodando ${contador++}`)
-            this.handler.handlerGame()
+            this.handler.handler()
         }, milliseconds)
     }
 

@@ -1,4 +1,5 @@
 import { GLOBALS } from "../config";
+import { TeamCaptains } from "../interface/Handler";
 import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
 
@@ -9,7 +10,7 @@ export class TeamControl {
     private teamBlue: Array<number> = []
   ) {}
 
-  addPlayerTeam(id: number, team: number) {
+  movePlayerForTeam(id: number, team: number) {
     switch(team) {
       case 1:
         this.teamRed.push(id)
@@ -33,9 +34,11 @@ export class TeamControl {
     return this.teamRed.length + this.teamBlue.length;
   }
 
-  upadteIdCaptains() {
-    GLOBALS.CAPTAINS.RED = this.teamRed[0]
-    GLOBALS.CAPTAINS.BLUE = this.teamBlue[0]
+  getCaptains(): TeamCaptains {
+    return {
+      redID: this.teamRed[0] ?? 99,
+      blueID: this.teamBlue[0] ?? 99
+    }
   }
 
   
@@ -47,7 +50,6 @@ export class TeamControl {
       playersInQueue.length <= this.getMissingPlayersFromMatch() 
     ) {
       for (var i = 0; i < playersInQueue.length; i++) {
-        console.log(i)
         let playerId = playersInQueue[i].id;
         if (this.teamRed.length <= this.teamBlue.length) {
           this.teamRed.push(playerId);

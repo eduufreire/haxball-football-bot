@@ -1,4 +1,3 @@
-
 import { GLOBALS } from "./config";
 import HaxballJS from "haxball.js";
 import playerChat from "./events/eventHandle";

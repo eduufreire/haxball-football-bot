@@ -1,7 +1,7 @@
 export const CONSTANTS = {
     TEAMS: {
         SPEC: 0,
-        RED: 1,
-        BLUE: 2
+        RED_NUMBER: 1,
+        BLUE_NUMBER: 2
     }
 }

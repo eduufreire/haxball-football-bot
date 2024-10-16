@@ -1,7 +1,6 @@
 import { GameHandler } from "../classes/GamerHandler";
 import { Room } from "../classes/Room";
 import { Timer } from "../classes/Timer";
-import { GLOBALS } from "../config";
 import { TeamCaptains } from "../interface/Handler";
 
 export default function playerChat() {
@@ -17,18 +16,46 @@ export default function playerChat() {
     timer.startTimer(1500)
   }
 
+  room.onPlayerJoin = (player) => {
+    if(gameControl.verifyIsChoiceMode()) {
+      gameControl.showSpectatorsPlayerForChoice()
+    }
+  }
+
   room.onPlayerLeave = (player) => {
+    if(gameControl.verifyIsChoiceMode()) {
+      gameControl.showSpectatorsPlayerForChoice()
+    }
+
     gameControl.controlAfterPlayerLeft(player)
   }
 
+  room.onGamePause = (byPlayer) => {
+    if(gameControl.verifyIsChoiceMode()) {
+      gameControl.showSpectatorsPlayerForChoice()
+    }
+  }
+
+  room.onPlayerTeamChange = (changed, player) => {
+    if(gameControl.verifyIsChoiceMode()) {
+      gameControl.showSpectatorsPlayerForChoice()
+    }
+  }
+
   room.onPlayerChat = (player, msg) => {
+
     let isCaptain = player.id === captains?.redID || player.id === captains?.blueID
     if(gameControl.verifyIsChoiceMode() && isCaptain) {
+      if(gameControl.verifyPreferenceChoice() !== player.team) {
+        return true
+      }
+
       if(verifyMessageIsNumber(msg)) {
-        gameControl.choicePlayerForTeam(parseInt(msg), player.team)
+        gameControl.choicePlayerForTeam(parseInt(msg), player.id, player.team)
         return false;
       }
     }
+
 
     if(msg.startsWith("#")){
       room.setPlayerAdmin(player.id, true)

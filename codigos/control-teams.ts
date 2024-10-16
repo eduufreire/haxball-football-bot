@@ -1,4 +1,4 @@
-import { Room } from "../classes/Room";
+import { Room } from "../src/classes/Room";
 
 let playesInTheRoom: PlayerObject[]
 let teamBlue: number[] = []

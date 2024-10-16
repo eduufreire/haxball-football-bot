@@ -1,4 +1,3 @@
-import { GLOBALS } from "../config";
 import { TeamCaptains } from "../interface/Handler";
 import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
@@ -10,62 +9,62 @@ export class TeamControl {
     private teamBlue: Array<number> = []
   ) {}
 
-  movePlayerForTeam(id: number, team: number) {
-    switch(team) {
+  public movePlayerForTeam(idPlayer: number, numberTeam: number): void {
+    this.room.setPlayerTeam(idPlayer, numberTeam);
+    switch (numberTeam) {
       case 1:
-        this.teamRed.push(id)
+        this.teamRed.push(idPlayer);
         break;
       case 2:
-        this.teamBlue.push(id)
+        this.teamBlue.push(idPlayer);
         break;
     }
   }
 
-  getActivePlayersInQueue(): Array<PlayerObject> {
-    // TODO: futuramente, aplicar filtro também para pessoas ausentes
-    return this.room.getPlayerList().filter((p) => p.id != 0 && p.team === 0);
-  }
 
-  getMissingPlayersFromMatch(): number {
-    return 4 - (this.teamRed.length + this.teamBlue.length);
-  }
-
-  getPlayersInMatch(): number {
-    return this.teamRed.length + this.teamBlue.length;
-  }
-
-  getCaptains(): TeamCaptains {
-    return {
-      redID: this.teamRed[0] ?? 99,
-      blueID: this.teamBlue[0] ?? 99
-    }
-  }
-
-  
-  autoAddPlayers() {
-    let playersInQueue = this.getActivePlayersInQueue();
-
+  public autoAddPlayers(playersInQueue: Array<PlayerObject>) {
     if (
       this.getPlayersInMatch() < 4 &&
-      playersInQueue.length <= this.getMissingPlayersFromMatch() 
+      playersInQueue.length <= this.getMissingPlayersFromMatch()
     ) {
-      for (var i = 0; i < playersInQueue.length; i++) {
-        let playerId = playersInQueue[i].id;
+      playersInQueue.forEach( player => {
+        let playerId = player.id
         if (this.teamRed.length <= this.teamBlue.length) {
           this.teamRed.push(playerId);
           this.room.setPlayerTeam(playerId, 1);
         } else if (this.teamBlue.length < this.teamRed.length) {
           this.teamBlue.push(playerId);
           this.room.setPlayerTeam(playerId, 2);
-        } 
-      }
+        }
+      })
     }
-
   }
 
-  verifyPlayerTeamAndRemove(
-    numberTeamPlayer: number,
-    idPlayer: number
+  public getMissingPlayersFromMatch(): number {
+    return 4 - (this.teamRed.length + this.teamBlue.length);
+  }
+
+  public getPlayersInMatch(): number {
+    return this.teamRed.length + this.teamBlue.length;
+  }
+
+  public getCaptains(): TeamCaptains {
+    return {
+      redID: this.teamRed[0] ?? 99,
+      blueID: this.teamBlue[0] ?? 99,
+    };
+  }
+
+
+  public verifyCaptainWithPreferenceChoice(): number {
+    return this.teamRed.length <= this.teamBlue.length
+      ? CONSTANTS.TEAMS.RED_NUMBER
+      : CONSTANTS.TEAMS.BLUE_NUMBER;
+  }
+
+  
+  public verifyPlayerTeamAndRemove(
+    numberTeamPlayer: number, idPlayer: number
   ): boolean {
     let index: number;
     let removed = false;
@@ -87,25 +86,4 @@ export class TeamControl {
     }
     return removed;
   }
-
-  showPlayersActivesForChoice() {
-    let players = this.getActivePlayersInQueue();
-
-    let message = "pv";
-    players.forEach((player, index) => {
-      if (index === players.length - 1) {
-        message += `${player.name}[${index + 1}]`;
-        return;
-      }
-      message += `${player.name}[${index + 1}], `;
-    });
-
-    let idTeamCaptain =
-      this.teamRed.length < this.teamBlue.length
-        ? this.teamRed[0]
-        : this.teamBlue[0];
-
-    this.room.sendAnnouncement(message, idTeamCaptain, 0xe8a157, "bold", 1);
-  }
-
 }

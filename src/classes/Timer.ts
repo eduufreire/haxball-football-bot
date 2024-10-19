@@ -13,12 +13,14 @@ export class Timer {
     startTimer(milliseconds: number) {
         let contador = 0
         this.timer = setInterval(() => {
+            console.log('rodando')
             this.handler.handler()
         }, milliseconds)
     }
 
     stopTimer() {
         if(this.timer !== null) {
+            console.log('parou')
             clearInterval(this.timer);
             this.timer = null;
         }

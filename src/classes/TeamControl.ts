@@ -21,40 +21,35 @@ export class TeamControl {
     }
   }
 
-
-  public autoAddPlayers(playersInQueue: Array<PlayerObject>) {
-    if (
-      this.getPlayersInMatch() < 4 &&
-      playersInQueue.length <= this.getMissingPlayersFromMatch()
-    ) {
-      playersInQueue.forEach( player => {
-        let playerId = player.id
-        if (this.teamRed.length <= this.teamBlue.length) {
-          this.teamRed.push(playerId);
-          this.room.setPlayerTeam(playerId, 1);
-        } else if (this.teamBlue.length < this.teamRed.length) {
-          this.teamBlue.push(playerId);
-          this.room.setPlayerTeam(playerId, 2);
-        }
-      })
-    }
+  public autoAddPlayers(playersInQueue: Array<PlayerObject>): void {
+    playersInQueue.forEach((player) => {
+      let playerId = player.id;
+      if (this.teamRed.length <= this.teamBlue.length) {
+        this.movePlayerForTeam(playerId, CONSTANTS.TEAMS.RED_NUMBER);
+      } else if (this.teamBlue.length < this.teamRed.length) {
+        this.movePlayerForTeam(playerId, CONSTANTS.TEAMS.BLUE_NUMBER);
+      }
+    });
   }
 
   public getMissingPlayersFromMatch(): number {
-    return 4 - (this.teamRed.length + this.teamBlue.length);
+    return (
+      CONSTANTS.MAX_PLAYERS_IN_MATCH -
+      (this.teamRed.length + this.teamBlue.length)
+    );
   }
 
-  public getPlayersInMatch(): number {
+  public getNumberPlayersInMatch(): number {
     return this.teamRed.length + this.teamBlue.length;
   }
 
   public getCaptains(): TeamCaptains {
+    let defaultValue = 99;
     return {
-      redID: this.teamRed[0] ?? 99,
-      blueID: this.teamBlue[0] ?? 99,
+      redID: this.teamRed[0] ?? defaultValue,
+      blueID: this.teamBlue[0] ?? defaultValue,
     };
   }
-
 
   public verifyCaptainWithPreferenceChoice(): number {
     return this.teamRed.length <= this.teamBlue.length
@@ -62,28 +57,54 @@ export class TeamControl {
       : CONSTANTS.TEAMS.BLUE_NUMBER;
   }
 
-  
   public verifyPlayerTeamAndRemove(
-    numberTeamPlayer: number, idPlayer: number
-  ): boolean {
+    numberTeamPlayer: number,
+    idPlayer: number
+  ): void {
     let index: number;
-    let removed = false;
     switch (numberTeamPlayer) {
       case 1:
         index = this.teamRed.indexOf(idPlayer);
         this.teamRed.splice(index, 1);
-        removed = true;
         break;
 
       case 2:
         index = this.teamBlue.indexOf(idPlayer);
         this.teamBlue.splice(index, 1);
-        removed = true;
         break;
 
       case 0:
         break;
     }
-    return removed;
+  }
+
+
+  public moveWinPlayers(numberTeam: number) {
+    if (numberTeam === CONSTANTS.TEAMS.RED_NUMBER) {
+      return;
+    } 
+
+    this.teamRed = []
+    this.teamBlue.forEach( id => {
+      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.RED_NUMBER)
+      this.teamRed.push(id)
+    })
+    this.teamBlue = []
+  }
+
+
+  public moveLoserPlayers(numberTeam: number) {
+    let playersId: Array<number>;
+    if( numberTeam === CONSTANTS.TEAMS.RED_NUMBER) {
+      playersId = this.teamRed
+      this.teamRed = []
+    } else {
+      playersId = this.teamBlue;
+      this.teamBlue = []
+    }
+
+    playersId.forEach(id => {
+      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.SPEC)
+    })
   }
 }

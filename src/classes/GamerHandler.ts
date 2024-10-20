@@ -1,26 +1,26 @@
 import { Handler, TeamCaptains } from "../interface/Handler";
-import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
 export class GameHandler implements Handler {
+
+	private teamCaptains: TeamCaptains | null = null
+	public isValidChoose= false
+	public isChoiceMode = false
+	private isValidMatch = false
+
 	constructor(
-		private room: RoomObject = Room.getRoom(),
-		private teamControl = new TeamControl(),
-		public isValidChoose: boolean = false,
-		public isChoiceMode: boolean = false,
-		private teamCaptains: TeamCaptains | null = null,
-		private isValidMatch: boolean = false
-	) {}
+		private room: RoomObject,
+		private teamControl,
+	) { }
 
 	public handler(): void {
-		let totalPlayers = 
+		const totalPlayers = 
 			this.room.getPlayerList()
-			.filter((p) => p.id != 0);
+			.filter((p) => p.id !== 0);
 
-		let spectators = totalPlayers.filter(p => p.team === 0);
-
-		let playersInMatch = this.teamControl.getNumberPlayersInMatch()
+		const spectators = totalPlayers.filter(p => p.team === 0);
+		const playersInMatch = this.teamControl.getNumberPlayersInMatch()
 		
 		if(totalPlayers.length > 4) {
 			this.isValidChoose = true
@@ -79,42 +79,29 @@ export class GameHandler implements Handler {
 	//   }
 	// }
 
-	// private enablePlayerChoiceMode() {
-	//   if (!this.isChoiceMode) {
-	//     this.room.pauseGame(true);
-	//     this.isChoiceMode = true;
-	//   }
-	// }
-
-	// private disablePlayerChoiceMode() {
-	//   this.room.pauseGame(false);
-	//   this.isChoiceMode = false;
-	// }
-
-
-
 	public showSpectatorsPlayerForChoice() {
-		this.room.sendAnnouncement('caralhoeu sou foda', 1)
-	//   this.updateTeamCaptains();
-	//   let spectatorsPlayers = this.getActiveSpecPlayers();
-
-	//   let message = `Digite o NÚMERO do jogador OU !rand / !top / !bottom \n\n`;
-	//   message += `Jogadores disponíveis para escolha: \n`;
-
-	//   spectatorsPlayers.forEach((player, index) => {
-	//     if (index === spectatorsPlayers.length - 1) {
-	//       message += `${player.name}[${index + 1}]`;
-	//       return;
-	//     }
-	//     message += `${player.name}[${index + 1}], `;
-	//   });
-
-	//   let idCaptain =
-	//     this.verifyPreferenceChoice() === CONSTANTS.TEAMS.RED_NUMBER
-	//       ? this.teamCaptains?.redID
-	//       : this.teamCaptains?.blueID;
-	//   this.room.sendAnnouncement(message, idCaptain, 0xe8a157, "bold", 1);
+		this.room.sendAnnouncement('modo escolha', 1)
 	}
+	// 	this.updateTeamCaptains();
+	// 	let spectatorsPlayers = this.getActiveSpecPlayers();
+
+	// 	let message = `Digite o NÚMERO do jogador OU !rand / !top / !bottom \n\n`;
+	// 	message += `Jogadores disponíveis para escolha: \n`;
+
+	// 	spectatorsPlayers.forEach((player, index) => {
+	// 	if (index === spectatorsPlayers.length - 1) {
+	// 		message += `${player.name}[${index + 1}]`;
+	// 		return;
+	// 	}
+	// 	message += `${player.name}[${index + 1}], `;
+	// 	});
+
+	// 	let idCaptain =
+	// 	this.verifyPreferenceChoice() === CONSTANTS.TEAMS.RED_NUMBER
+	// 		? this.teamCaptains?.redID
+	// 		: this.teamCaptains?.blueID;
+	// 	this.room.sendAnnouncement(message, idCaptain, 0xe8a157, "bold", 1);
+	// }
 
 	// public getActiveSpecPlayers(): Array<PlayerObject> {
 	//   // TODO: futuramente, aplicar filtro também para pessoas ausentes
@@ -145,9 +132,9 @@ export class GameHandler implements Handler {
 	//   return true;
 	// }
 
-	// private updateTeamCaptains(): void {
-	//   this.teamCaptains = this.teamControl.getCaptains();
-	// }
+	private updateTeamCaptains(): void {
+		this.teamCaptains = this.teamControl.getCaptains();
+	}
 
 	// private restartGame(): void {
 	//   this.room.stopGame();

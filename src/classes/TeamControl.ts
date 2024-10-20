@@ -1,12 +1,14 @@
 import { TeamCaptains } from "../interface/Handler";
 import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
+import { Database } from "../database-memory";
 
 export class TeamControl {
   constructor(
-    private room: RoomObject = Room.getRoom(),
-    private teamRed: Array<number> = [],
-    private teamBlue: Array<number> = []
+    private room: RoomObject,
+    private teamRed: Array<number>,
+    private teamBlue: Array<number>,
+    private db: Database,
   ) {}
 
   public movePlayerForTeam(idPlayer: number, numberTeam: number): void {
@@ -59,7 +61,7 @@ export class TeamControl {
 
   public verifyPlayerTeamAndRemove(
     numberTeamPlayer: number,
-    idPlayer: number
+    idPlayer: number,
   ): void {
     let index: number;
     switch (numberTeamPlayer) {
@@ -78,33 +80,31 @@ export class TeamControl {
     }
   }
 
-
   public moveWinPlayers(numberTeam: number) {
     if (numberTeam === CONSTANTS.TEAMS.RED_NUMBER) {
       return;
-    } 
+    }
 
-    this.teamRed = []
-    this.teamBlue.forEach( id => {
-      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.RED_NUMBER)
-      this.teamRed.push(id)
-    })
-    this.teamBlue = []
+    this.teamRed = [];
+    this.teamBlue.forEach((id) => {
+      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.RED_NUMBER);
+      this.teamRed.push(id);
+    });
+    this.teamBlue = [];
   }
-
 
   public moveLoserPlayers(numberTeam: number) {
     let playersId: Array<number>;
-    if( numberTeam === CONSTANTS.TEAMS.RED_NUMBER) {
-      playersId = this.teamRed
-      this.teamRed = []
+    if (numberTeam === CONSTANTS.TEAMS.RED_NUMBER) {
+      playersId = this.teamRed;
+      this.teamRed = [];
     } else {
       playersId = this.teamBlue;
-      this.teamBlue = []
+      this.teamBlue = [];
     }
 
-    playersId.forEach(id => {
-      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.SPEC)
-    })
+    playersId.forEach((id) => {
+      this.room.setPlayerTeam(id, CONSTANTS.TEAMS.SPEC);
+    });
   }
 }

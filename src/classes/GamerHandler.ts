@@ -4,13 +4,13 @@ import { TeamControl } from "./TeamControl";
 
 export class GameHandler implements Handler {
 
-	public isValidChoose= false
+	public isValidChoose = false
 	public isChoiceMode = false
 	private isValidMatch = false
 
 	constructor(
 		private room: RoomObject,
-		private teamControl,
+		private teamControl: TeamControl,
 	) { }
 
 	public handler(): void {
@@ -19,7 +19,7 @@ export class GameHandler implements Handler {
 			.filter((p) => p.id !== 0);
 
 		const spectators = totalPlayers.filter(p => p.team === 0);
-		const playersInMatch = this.teamControl.getNumberPlayersInMatch()
+		const playersInMatch = this.teamControl.totalPlayersInMatch()
 		
 		if(totalPlayers.length > 4) {
 			this.isValidChoose = true
@@ -44,15 +44,23 @@ export class GameHandler implements Handler {
 	}
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
-		this.teamControl.verifyPlayerTeamAndRemove(player.team, player.id);
+		if(player.team !== 0 ) {
+			this.teamControl.removePlayerTeam(player.id, player.team);
+		}
+		console.log('saiu')
 		// TODO: tratar stats do player apos saida
 	}
 
-	// public choicePlayerForTeam(
-	//   playerChoiced: number,
-	//   idCaptain: number,
-	//   team: number
-	// ): void {
+	public verifyIsChoiceMode(): boolean {
+		return this.isChoiceMode
+	}
+
+	public choicePlayerForTeam(
+	  playerChoiced: number,
+	  idCaptain: number,
+	  team: number
+	): void {
+		console.log('escolheu')
 	//   let spectatorsPlayers = this.getActiveSpecPlayers();
 
 	//   if (!this.verifyIndexIsValid(playerChoiced)) {
@@ -76,7 +84,7 @@ export class GameHandler implements Handler {
 	//     this.disablePlayerChoiceMode();
 	//     this.updateTeamCaptains();
 	//   }
-	// }
+	}
 
 	public showSpectatorsPlayerForChoice() {
 		this.room.sendAnnouncement('modo escolha', 1)

@@ -10,9 +10,7 @@ export class Timer {
   }
 
   startTimer(milliseconds: number) {
-    let contador = 0;
     this.timer = setInterval(() => {
-      console.log("rodando");
       this.handler.handler();
     }, milliseconds);
   }

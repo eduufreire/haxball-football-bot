@@ -6,8 +6,8 @@
   "formatter": {
     "enabled": true,
     "formatWithErrors": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
+    "indentStyle": "tab",
+    "indentWidth": 4,
     "lineEnding": "lf",
     "lineWidth": 80
   },

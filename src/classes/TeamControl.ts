@@ -1,37 +1,33 @@
 import { TeamCaptains } from "../interface/Handler";
 import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
-import { Database } from "../database-memory";
+import { TeamRepository } from "../repository/TeamsInMemory";
 
 export class TeamControl {
   constructor(
     private room: RoomObject,
-    private teamRed: Array<number>,
-    private teamBlue: Array<number>,
-    private db: Database,
-  ) {}
+    private teamRepository: TeamRepository,
+  ) { }
 
   public movePlayerForTeam(idPlayer: number, numberTeam: number): void {
     this.room.setPlayerTeam(idPlayer, numberTeam);
-    switch (numberTeam) {
-      case 1:
-        this.teamRed.push(idPlayer);
-        break;
-      case 2:
-        this.teamBlue.push(idPlayer);
-        break;
-    }
+    this.teamRepository.addPlayerTeam(idPlayer, numberTeam);
   }
 
   public autoAddPlayers(playersInQueue: Array<PlayerObject>): void {
-    playersInQueue.forEach((player) => {
-      let playerId = player.id;
-      if (this.teamRed.length <= this.teamBlue.length) {
-        this.movePlayerForTeam(playerId, CONSTANTS.TEAMS.RED_NUMBER);
-      } else if (this.teamBlue.length < this.teamRed.length) {
-        this.movePlayerForTeam(playerId, CONSTANTS.TEAMS.BLUE_NUMBER);
+    let lengthTeamRed = this.teamRepository.getLengthTeam(1);
+    let lengthTeamBlue = this.teamRepository.getLengthTeam(2);
+
+    for (const player of playersInQueue) {
+      const playerId = player.id;
+      if (lengthTeamRed <= lengthTeamBlue) {
+        this.movePlayerForTeam(playerId, 1);
+        lengthTeamRed = this.teamRepository.getLengthTeam(1);
+      } else if (lengthTeamBlue < lengthTeamRed) {
+        this.movePlayerForTeam(playerId, 2);
+        lengthTeamBlue = this.teamRepository.getLengthTeam(2);
       }
-    });
+    }
   }
 
   public getMissingPlayersFromMatch(): number {
@@ -41,20 +37,10 @@ export class TeamControl {
     );
   }
 
-  public getNumberPlayersInMatch(): number {
-    return this.teamRed.length + this.teamBlue.length;
-  }
-
-  public getCaptains(): TeamCaptains {
-    let defaultValue = 99;
-    return {
-      redID: this.teamRed[0] ?? defaultValue,
-      blueID: this.teamBlue[0] ?? defaultValue,
-    };
-  }
-
   public verifyCaptainWithPreferenceChoice(): number {
-    return this.teamRed.length <= this.teamBlue.length
+    const lengthTeamRed = this.teamRepository.getLengthTeam(1);
+    const lengthTeamBlue = this.teamRepository.getLengthTeam(2);
+    return lengthTeamRed <= lengthTeamBlue
       ? CONSTANTS.TEAMS.RED_NUMBER
       : CONSTANTS.TEAMS.BLUE_NUMBER;
   }

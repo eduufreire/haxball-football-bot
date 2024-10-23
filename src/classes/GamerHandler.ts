@@ -1,10 +1,9 @@
-import { Handler, TeamCaptains } from "../interface/Handler";
+import { Handler } from "../interface/Handler";
 import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
 export class GameHandler implements Handler {
 
-	private teamCaptains: TeamCaptains | null = null
 	public isValidChoose= false
 	public isChoiceMode = false
 	private isValidMatch = false
@@ -131,10 +130,6 @@ export class GameHandler implements Handler {
 	//   }
 	//   return true;
 	// }
-
-	private updateTeamCaptains(): void {
-		this.teamCaptains = this.teamControl.getCaptains();
-	}
 
 	// private restartGame(): void {
 	//   this.room.stopGame();

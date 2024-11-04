@@ -10,7 +10,6 @@ export default function playerChat() {
 	const teamControl = new TeamControl(room, teamInMemory);
 	const gameControl = new GameHandler(room, teamControl);
 	const timer = new Timer(gameControl);
-	const captains: TeamCaptains | null = null;
 
 	room.onRoomLink = (link) => {
 		console.log(link);
@@ -36,12 +35,6 @@ export default function playerChat() {
 			gameControl.showSpectatorsPlayerForChoice();
 		}
 	};
-
-	//   room.onPlayerTeamChange = (changed, player) => {
-	//     if(gameControl.isChoiceMode) {
-	// 		gameControl.showSpectatorsPlayerForChoice()
-	// 	}
-	//   }
 
 	room.onPlayerChat = (player, msg) => {
 		const isCaptain =
@@ -71,9 +64,16 @@ export default function playerChat() {
 		return true;
 	};
 
-	// room.onTeamVictory = (scores) => {
-	//   gameControl.handlerVictoryTeam(scores.red, scores.blue)
-	// }
+	room.onTeamVictory = (scores) => {
+		console.log(scores)
+		if (scores.blue > scores.red) {
+			gameControl.handlerVictory(2)
+		} else {
+			console.log('red')
+			gameControl.handlerVictory(1)
+		}
+	}
+
 
 	// room.onGameTick = () => {
 	//   if (gameControl.quantidadeDePessoas() === 0) {

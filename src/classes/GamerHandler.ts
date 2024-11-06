@@ -18,6 +18,8 @@ export class GameHandler implements Handler {
 		const spectators = this.getActiveSpectatorsPlayers();
 		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
 
+		console.log(this.isValidChoose)
+
 		if (totalPlayers.length > 4) {
 			this.isValidChoose = true;
 			this.isValidMatch = true;
@@ -27,6 +29,7 @@ export class GameHandler implements Handler {
 		}
 
 		if (isNeededPlayer && !this.isValidChoose) {
+			// todo: alterar aqui para conseguir adicionar quando tiver poucos spec
 			if (
 				teamInMemory.getTotalPlayers() < 2 ||
 				spectators.length % 2 === 0
@@ -52,7 +55,16 @@ export class GameHandler implements Handler {
 		} else {
 			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC)
 		}
+
+		const spectators = this.getActiveSpectatorsPlayers();
+		this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
+		this.isChoiceMode = true;
+
+		setTimeout(() => {
+			this.showSpectatorsPlayerForChoice()
+		}, 1000)
 	}
+
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
 		if (player.team !== 0) {
@@ -97,7 +109,7 @@ export class GameHandler implements Handler {
 			this.showSpectatorsPlayerForChoice();
 		} else {
 			this.isChoiceMode = false;
-			this.room.pauseGame(false);
+			this.startGame()
 		}
 	}
 
@@ -131,5 +143,13 @@ export class GameHandler implements Handler {
 
 	public verifyIsChoiceMode(): boolean {
 		return this.isChoiceMode;
+	}
+
+	public startGame() {
+		if(this.room.getScores()) {
+			this.room.pauseGame(false)
+		} else {
+			this.room.startGame()
+		}
 	}
 }

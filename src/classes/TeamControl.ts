@@ -62,6 +62,7 @@ export class TeamControl {
 	}
 
 	public neededPlayersInMatch(): boolean {
+		console.log(this.teamRepository.getTotalPlayers())
 		return (
 			this.teamRepository.getTotalPlayers() <
 			CONSTANTS.MAX_PLAYERS_IN_MATCH

@@ -1,3 +1,3 @@
 export const GLOBALS = {
-  TOKEN: "thr1.AAAAAGcm4lGvHesJpgXz3A.BrD3myb2K50",
+  TOKEN: "thr1.AAAAAGcqxsk3ms7xcylckw.6HtJeDSSOWo",
 };

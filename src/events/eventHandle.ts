@@ -65,13 +65,14 @@ export default function playerChat() {
 	};
 
 	room.onTeamVictory = (scores) => {
-		console.log(scores)
-		if (scores.blue > scores.red) {
-			gameControl.handlerVictory(2)
-		} else {
-			console.log('red')
-			gameControl.handlerVictory(1)
-		}
+		setTimeout(() => {
+			room.stopGame()
+			if (scores.blue > scores.red) {
+				gameControl.handlerVictory(2)
+			} else {
+				gameControl.handlerVictory(1)
+			}
+		}, 3000)
 	}
 
 

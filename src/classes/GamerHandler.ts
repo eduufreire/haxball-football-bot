@@ -1,5 +1,6 @@
 import { Handler } from "../interface/Handler";
 import { TEAM, teamInMemory } from "../repository/TeamsInMemory";
+import { CONSTANTS } from "../utils/constants";
 import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
@@ -18,8 +19,6 @@ export class GameHandler implements Handler {
 		const spectators = this.getActiveSpectatorsPlayers();
 		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
 
-		console.log(this.isValidChoose)
-
 		if (totalPlayers.length > 4) {
 			this.isValidChoose = true;
 			this.isValidMatch = true;
@@ -31,10 +30,14 @@ export class GameHandler implements Handler {
 		if (isNeededPlayer && !this.isValidChoose) {
 			// todo: alterar aqui para conseguir adicionar quando tiver poucos spec
 			if (
-				teamInMemory.getTotalPlayers() < 2 ||
-				spectators.length % 2 === 0
+				teamInMemory.getTotalPlayers() <=
+					CONSTANTS.MAX_PLAYERS_IN_MATCH &&
+				(this.getTotalPlayers().length % 2 === 0 ||
+					this.getTotalPlayers().length <
+						CONSTANTS.MIN_PLAYERS_IN_MATCH)
 			) {
 				this.teamControl.autoAddPlayers(spectators);
+				this.startGame();
 			}
 			return;
 		}
@@ -49,22 +52,28 @@ export class GameHandler implements Handler {
 	}
 
 	public handlerVictory(numberTeamWin: TEAM) {
-		if(numberTeamWin === TEAM.BLUE) {
-			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC)
-			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.RED)
+		if (numberTeamWin === TEAM.BLUE) {
+			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
+			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.RED);
 		} else {
-			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC)
+			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
 		}
 
+		// TODO: verificar se é modo escolha ou randomiza os timesp or nao ter players o suficiente
 		const spectators = this.getActiveSpectatorsPlayers();
 		this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
-		this.isChoiceMode = true;
-
-		setTimeout(() => {
-			this.showSpectatorsPlayerForChoice()
-		}, 1000)
+		if (this.getTotalPlayers().length < 4) {
+			this.isChoiceMode = false;
+			setTimeout(() => {
+				this.startGame();
+			}, 1000);
+		} else {
+			this.isChoiceMode = true;
+			setTimeout(() => {
+				this.showSpectatorsPlayerForChoice();
+			}, 1000);
+		}
 	}
-
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
 		if (player.team !== 0) {
@@ -109,7 +118,7 @@ export class GameHandler implements Handler {
 			this.showSpectatorsPlayerForChoice();
 		} else {
 			this.isChoiceMode = false;
-			this.startGame()
+			this.startGame();
 		}
 	}
 
@@ -146,10 +155,10 @@ export class GameHandler implements Handler {
 	}
 
 	public startGame() {
-		if(this.room.getScores()) {
-			this.room.pauseGame(false)
+		if (this.room.getScores()) {
+			this.room.pauseGame(false);
 		} else {
-			this.room.startGame()
+			this.room.startGame();
 		}
 	}
 }

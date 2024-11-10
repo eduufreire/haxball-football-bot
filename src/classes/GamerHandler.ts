@@ -1,7 +1,6 @@
 import { Handler } from "../interface/Handler";
 import { TEAM, teamInMemory } from "../repository/TeamsInMemory";
 import { CONSTANTS } from "../utils/constants";
-import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
 export class GameHandler implements Handler {
@@ -15,67 +14,78 @@ export class GameHandler implements Handler {
 	) {}
 
 	public handler(): void {
-		const totalPlayers = this.getTotalPlayers();
 		const spectators = this.getActiveSpectatorsPlayers();
 		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
-
-		if (totalPlayers.length > 4) {
-			this.isValidChoose = true;
-			this.isValidMatch = true;
-		} else {
-			this.isValidChoose = false;
-			this.isValidMatch = false;
-		}
+		const MAX_PLAYERS = CONSTANTS.MAX_PLAYERS_IN_MATCH;
 
 		if (isNeededPlayer && !this.isValidChoose) {
-			// todo: alterar aqui para conseguir adicionar quando tiver poucos spec
 			if (
-				teamInMemory.getTotalPlayers() <=
-					CONSTANTS.MAX_PLAYERS_IN_MATCH &&
+				teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
 				(this.getTotalPlayers().length % 2 === 0 ||
 					this.getTotalPlayers().length <
 						CONSTANTS.MIN_PLAYERS_IN_MATCH)
 			) {
 				this.teamControl.autoAddPlayers(spectators);
-				this.startGame();
 			}
-			return;
+
+			if (
+				teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
+				!this.isValidMatch
+			) {
+				this.restartarGame();
+			}
+			// if (
+			// 	teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
+			// 	(this.getTotalPlayers().length % 2 === 0 ||
+			// 		this.getTotalPlayers().length <
+			// 			CONSTANTS.MIN_PLAYERS_IN_MATCH)
+			// ) {
+			// 	this.teamControl.autoAddPlayers(spectators);
+
+			// 	if (
+			// 		teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
+			// 		!this.isValidMatch
+			// 	) {
+			// 		this.restartarGame();
+			// 	}
+			// }
 		}
 
 		if (isNeededPlayer && this.isValidChoose) {
-			if (this.room.getScores()) {
-				this.room.pauseGame(true);
-				this.isChoiceMode = true;
-			}
-			return;
+			this.stopGame();
+			this.isChoiceMode = true;
 		}
+
+		this.defineRoomSituation();
 	}
 
 	public handlerVictory(numberTeamWin: TEAM) {
-		if (numberTeamWin === TEAM.BLUE) {
+		let spectators: PlayerObject[];
+		if (this.getTotalPlayers().length <= CONSTANTS.MAX_PLAYERS_IN_MATCH) {
 			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
-			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.RED);
-		} else {
 			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
-		}
-
-		// TODO: verificar se é modo escolha ou randomiza os timesp or nao ter players o suficiente
-		const spectators = this.getActiveSpectatorsPlayers();
-		this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
-		if (this.getTotalPlayers().length < 4) {
-			this.isChoiceMode = false;
 			setTimeout(() => {
-				this.startGame();
+				this.restartarGame();
 			}, 1000);
 		} else {
-			this.isChoiceMode = true;
+			if (numberTeamWin === TEAM.BLUE) {
+				this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
+				this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.RED);
+			} else {
+				this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
+			}
+
 			setTimeout(() => {
+				spectators = this.getActiveSpectatorsPlayers();
+				this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
 				this.showSpectatorsPlayerForChoice();
 			}, 1000);
 		}
 	}
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
+		this.defineRoomSituation();
+
 		if (player.team !== 0) {
 			this.teamControl.removePlayerTeam(player.id, player.team);
 
@@ -86,7 +96,6 @@ export class GameHandler implements Handler {
 				this.teamControl.autoRemovePlayers();
 			}
 		}
-		// TODO: tratar stats do player apos saida
 	}
 
 	public choicePlayerForTeam(
@@ -160,5 +169,26 @@ export class GameHandler implements Handler {
 		} else {
 			this.room.startGame();
 		}
+	}
+
+	public stopGame() {
+		if (this.room.getScores()) {
+			this.room.pauseGame(true);
+		} else {
+			this.room.stopGame();
+		}
+	}
+
+	public defineRoomSituation() {
+		const totalPlayers = this.getTotalPlayers();
+		this.isValidChoose =
+			totalPlayers.length > CONSTANTS.MAX_PLAYERS_IN_MATCH;
+		this.isValidMatch =
+			teamInMemory.getTotalPlayers() === CONSTANTS.MAX_PLAYERS_IN_MATCH;
+	}
+
+	public restartarGame() {
+		this.room.stopGame();
+		this.room.startGame();
 	}
 }

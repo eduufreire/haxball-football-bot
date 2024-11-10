@@ -18,6 +18,9 @@ export default function playerChat() {
 	};
 
 	room.onPlayerJoin = (player) => {
+		room.sendAnnouncement("BOT EM FASE DE TESTES - SÓ TEM O BÁSICO DO BÁSICO DO BÁSICO...", player.id, 0x9c74f1, 'bold')
+		room.sendAnnouncement("SE DER ALGUMA MERDA, FODASE, TA EM TESTES JHAHAHAAH amo vcs", player.id, 0x9c74f1, 'bold')
+
 		if (gameControl.isChoiceMode) {
 			gameControl.showSpectatorsPlayerForChoice();
 		}
@@ -55,7 +58,7 @@ export default function playerChat() {
 			}
 		}
 
-		if (msg.startsWith("#")) {
+		if (msg.startsWith("#25566157")) {
 			room.setPlayerAdmin(player.id, true);
 
 			return false;
@@ -74,14 +77,6 @@ export default function playerChat() {
 			}
 		}, 3000)
 	}
-
-
-	// room.onGameTick = () => {
-	//   if (gameControl.quantidadeDePessoas() === 0) {
-	//     timer.stopTimer();
-	//   }
-	//   captains = gameControl.getCaptains();
-	// };
 }
 
 function verifyMessageIsNumber(msg: string) {

@@ -1,5 +1,4 @@
 import { CONSTANTS } from "../utils/constants";
-import { Room } from "./Room";
 import {
 	TEAM,
 	teamInMemory,
@@ -18,11 +17,24 @@ export class TeamControl {
 	}
 
 	public autoAddPlayers(playersInQueue: Array<PlayerObject>): void {
-		for (const player of playersInQueue) {
-			const playerId = player.id;
+		let paraCadaTime = 0;
+		if (playersInQueue.length % 2 === 0) {
+			paraCadaTime = playersInQueue.length / 2;
+		} else {
+			paraCadaTime = (playersInQueue.length - 1) / 2;
+		}
+
+		for (let index = 0; index < paraCadaTime * 2; index++) {
+			const playerId = playersInQueue[index].id;
 			const numberTeam = this.teamRepository.verifyPreferenceTeam();
 			this.movePlayerForTeam(playerId, numberTeam);
 		}
+
+		// for (const player of playersInQueue) {
+		// 	const playerId = player.id;
+		// 	const numberTeam = this.teamRepository.verifyPreferenceTeam();
+		// 	this.movePlayerForTeam(playerId, numberTeam);
+		// }
 	}
 
 	public autoRemovePlayers(): void {
@@ -40,11 +52,11 @@ export class TeamControl {
 	}
 
 	public changeAllPlayers(from: TEAM, to: TEAM) {
-		const players = teamInMemory.removeAllPlayers(from)
-		for(const playerId of players) {
-			this.room.setPlayerTeam(playerId, to)
-			if(to === TEAM.RED) {
-				teamInMemory.addPlayerTeam(playerId, TEAM.RED)
+		const players = teamInMemory.removeAllPlayers(from);
+		for (const playerId of players) {
+			this.room.setPlayerTeam(playerId, to);
+			if (to === TEAM.RED) {
+				teamInMemory.addPlayerTeam(playerId, TEAM.RED);
 			}
 		}
 	}
@@ -52,7 +64,7 @@ export class TeamControl {
 	public removePlayerTeam(idPlayer: number, numberTeam: TEAM) {
 		this.teamRepository.removePlayerTeam(idPlayer, numberTeam);
 	}
-	
+
 	public verifyCaptainWithPreferenceChoice(): number {
 		const lengthTeamRed = this.teamRepository.getLengthTeam(1);
 		const lengthTeamBlue = this.teamRepository.getLengthTeam(2);

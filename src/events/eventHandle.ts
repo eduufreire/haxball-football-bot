@@ -19,7 +19,6 @@ export default function playerChat() {
 
 	room.onPlayerJoin = (player) => {
 		room.sendAnnouncement("BOT EM FASE DE TESTES - SÓ TEM O BÁSICO DO BÁSICO DO BÁSICO...", player.id, 0x9c74f1, 'bold')
-		room.sendAnnouncement("SE DER ALGUMA MERDA, FODASE, TA EM TESTES JHAHAHAAH amo vcs", player.id, 0x9c74f1, 'bold')
 
 		if (gameControl.isChoiceMode) {
 			gameControl.showSpectatorsPlayerForChoice();

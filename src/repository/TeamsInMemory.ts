@@ -73,9 +73,9 @@ class TeamsInMemory implements TeamRepository {
 
 	public removeAllPlayers(numberTeam: TEAM): Array<number> {
 		if(numberTeam === TEAM.RED) {
-			return this.teamRed.players.splice(0, 3)
+			return this.teamRed.players.splice(0, 4)
 		}
-		return this.teamBlue.players.splice(0, 3)
+		return this.teamBlue.players.splice(0, 4)
 	}
 
 	public getCaptainTeam(numberTeam: TEAM): number {

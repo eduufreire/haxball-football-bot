@@ -5,7 +5,7 @@ import { Room } from "./classes/Room";
 
 HaxballJS.then((HBInit) => {
   const room = HBInit({
-    roomName: "testando bot de merda - onça pintuda (acjho que arrumei)",
+    roomName: "testando bot",
     playerName: "criador do haxball 2.0",
     maxPlayers: 16,
     public: false,

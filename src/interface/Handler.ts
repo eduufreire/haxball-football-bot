@@ -1,8 +1,8 @@
 export interface Handler {
-    handler(): void
+  handler(): void;
 }
 
 export type TeamCaptains = {
-    redID: number;
-    blueID: number;
-}
+  redID: number;
+  blueID: number;
+};

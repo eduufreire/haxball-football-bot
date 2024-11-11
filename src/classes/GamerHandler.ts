@@ -1,131 +1,194 @@
-import { Handler, TeamCaptains } from "../interface/Handler";
+import { Handler } from "../interface/Handler";
+import { TEAM, teamInMemory } from "../repository/TeamsInMemory";
 import { CONSTANTS } from "../utils/constants";
-import { Room } from "./Room";
 import { TeamControl } from "./TeamControl";
 
 export class GameHandler implements Handler {
-    constructor(
-        private room: RoomObject = Room.getRoom(),
-        private teamControl = new TeamControl(),
-        private isChoiceMode: boolean = false,
-        private teamCaptains: TeamCaptains | null = null
-    ) {}
+	public isValidChoose = false;
+	public isChoiceMode = false;
+	private isValidMatch = false;
 
-    public handler(): void {
-        let spectatorsPlayers = this.getActiveSpecPlayers();
-        let missingPlayers = this.teamControl.getMissingPlayersFromMatch();
-        this.updateTeamCaptains();
+	constructor(
+		private room: RoomObject,
+		private teamControl: TeamControl,
+	) {}
 
-        if (missingPlayers > 0 && spectatorsPlayers.length <= missingPlayers) {
-            this.teamControl.autoAddPlayers(spectatorsPlayers);
-            return;
-        }
+	public handler(): void {
+		const spectators = this.getActiveSpectatorsPlayers();
+		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
+		const MAX_PLAYERS = CONSTANTS.MAX_PLAYERS_IN_MATCH;
 
-        if (
-            spectatorsPlayers.length > missingPlayers &&
-            missingPlayers > 0 &&
-            !this.isChoiceMode
-        ) {
-            this.enablePlayerChoiceMode();
-        }
-    }
+		if (isNeededPlayer && !this.isValidChoose) {
+			if (
+				teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
+				(this.getTotalPlayers().length % 2 === 0 ||
+					this.getTotalPlayers().length <
+						CONSTANTS.MIN_PLAYERS_IN_MATCH)
+			) {
+				this.teamControl.autoAddPlayers(spectators);
+			}
 
+			if (
+				teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
+				!this.isValidMatch
+			) {
+				this.restartarGame();
+			}
+			// if (
+			// 	teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
+			// 	(this.getTotalPlayers().length % 2 === 0 ||
+			// 		this.getTotalPlayers().length <
+			// 			CONSTANTS.MIN_PLAYERS_IN_MATCH)
+			// ) {
+			// 	this.teamControl.autoAddPlayers(spectators);
 
-    public choicePlayerForTeam(
-        playerChoiced: number, idCaptain: number, team: number
-    ): void {
-        let spectatorsPlayers = this.getActiveSpecPlayers();
+			// 	if (
+			// 		teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
+			// 		!this.isValidMatch
+			// 	) {
+			// 		this.restartarGame();
+			// 	}
+			// }
+		}
 
-        if(!this.verifyIndexIsValid(playerChoiced)) {
-            let invalidIndexMessage = `O número digitado é inválido para escolha`
-            this.room.sendAnnouncement(invalidIndexMessage, idCaptain, 0xd9554c, "bold", 1);
-            this.showSpectatorsPlayerForChoice()
-            return;
-        }
+		if (isNeededPlayer && this.isValidChoose) {
+			this.stopGame();
+			this.isChoiceMode = true;
+		}
 
-        let idPlayer = spectatorsPlayers[playerChoiced - 1].id;
-        this.teamControl.movePlayerForTeam(idPlayer, team);
+		this.defineRoomSituation();
+	}
 
-        let missingPlayers = this.teamControl.getMissingPlayersFromMatch();
-        if (missingPlayers === 0) {
-            this.disablePlayerChoiceMode();
-            this.updateTeamCaptains();
-        }
-    }
+	public handlerVictory(numberTeamWin: TEAM) {
+		let spectators: PlayerObject[];
+		if (this.getTotalPlayers().length <= CONSTANTS.MAX_PLAYERS_IN_MATCH) {
+			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
+			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
+			setTimeout(() => {
+				this.restartarGame();
+			}, 1000);
+		} else {
+			if (numberTeamWin === TEAM.BLUE) {
+				this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
+				this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.RED);
+			} else {
+				this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
+			}
 
+			setTimeout(() => {
+				spectators = this.getActiveSpectatorsPlayers();
+				this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
+				this.showSpectatorsPlayerForChoice();
+			}, 1000);
+		}
+	}
 
-    private enablePlayerChoiceMode() {
-        if (!this.isChoiceMode) {
-            this.room.pauseGame(true);
-            this.isChoiceMode = true;
-        }
-    }
+	public controlAfterPlayerLeft(player: PlayerObject) {
+		this.defineRoomSituation();
 
+		if (player.team !== 0) {
+			this.teamControl.removePlayerTeam(player.id, player.team);
 
-    private disablePlayerChoiceMode() {
-        this.room.pauseGame(false);
-        this.isChoiceMode = false;
-    }
+			if (
+				teamInMemory.getTotalPlayers() % 2 !== 0 &&
+				this.getActiveSpectatorsPlayers().length === 0
+			) {
+				this.teamControl.autoRemovePlayers();
+			}
+		}
+	}
 
+	public choicePlayerForTeam(
+		playerChoiced: number,
+		idCaptain: number,
+		team: number,
+	): void {
+		const spectators = this.getActiveSpectatorsPlayers();
 
-    public controlAfterPlayerLeft(player: PlayerObject) {
-        this.teamControl.verifyPlayerTeamAndRemove(
-            player.team,
-            player.id
-        );
-        // TODO: tratar stats do player apos saida
-    }
-    
+		if (playerChoiced < 0 || playerChoiced > spectators.length) {
+			const invalidIndexMessage =
+				"O número digitado é inválido para escolha";
+			this.room.sendAnnouncement(
+				invalidIndexMessage,
+				idCaptain,
+				0xd9554c,
+				"bold",
+				1,
+			);
+			this.showSpectatorsPlayerForChoice();
+			return;
+		}
 
-    public showSpectatorsPlayerForChoice() {
-        this.updateTeamCaptains();
-        let spectatorsPlayers = this.getActiveSpecPlayers();
+		const idPlayer = spectators[playerChoiced - 1].id;
+		this.teamControl.movePlayerForTeam(idPlayer, team);
 
-        let message = `Digite o NÚMERO do jogador OU !rand / !top / !bottom \n\n`;
-        message += `Jogadores disponíveis para escolha: \n`;
+		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
+		if (isNeededPlayer) {
+			this.showSpectatorsPlayerForChoice();
+		} else {
+			this.isChoiceMode = false;
+			this.startGame();
+		}
+	}
 
-        spectatorsPlayers.forEach((player, index) => {
-            if (index === spectatorsPlayers.length - 1) {
-                message += `${player.name}[${index + 1}]`;
-                return;
-            }
-            message += `${player.name}[${index + 1}], `;
-        });
+	public showSpectatorsPlayerForChoice() {
+		const spectators = this.getActiveSpectatorsPlayers();
 
-        let idCaptain =
-        this.verifyPreferenceChoice() === CONSTANTS.TEAMS.RED_NUMBER
-            ? this.teamCaptains?.redID
-            : this.teamCaptains?.blueID;
-        this.room.sendAnnouncement(message, idCaptain, 0xe8a157, "bold", 1);
-    }
+		let message =
+			"Digite o NÚMERO do jogador OU !rand / !top / !bottom \n\n";
+		message += "Jogadores disponíveis para escolha: \n";
 
+		spectators.forEach((player, index) => {
+			if (index === spectators.length - 1) {
+				message += `${player.name}[${index + 1}]`;
+				return;
+			}
+			message += `${player.name}[${index + 1}], `;
+		});
 
-    public getActiveSpecPlayers(): Array<PlayerObject> {
-        // TODO: futuramente, aplicar filtro também para pessoas ausentes
-        return this.room.getPlayerList().filter((p) => p.id != 0 && p.team === 0);
-    }
+		const team = this.teamControl.verifyCaptainWithPreferenceChoice();
+		const idCaptain = teamInMemory.getCaptainTeam(team);
+		this.room.sendAnnouncement(message, idCaptain, 0xe8a157, "bold", 1);
+	}
 
-    public verifyIsChoiceMode(): boolean {
-        return this.isChoiceMode;
-    }
+	public getTotalPlayers(): Array<PlayerObject> {
+		return this.room.getPlayerList().filter((p) => p.id !== 0);
+	}
 
-    public getCaptains(): TeamCaptains | null {
-        return this.teamCaptains;
-    }
+	public getActiveSpectatorsPlayers(): Array<PlayerObject> {
+		return this.getTotalPlayers().filter((p) => p.team === 0);
+	}
 
-    public verifyPreferenceChoice(): number {
-        return this.teamControl.verifyCaptainWithPreferenceChoice();
-    }
+	public verifyIsChoiceMode(): boolean {
+		return this.isChoiceMode;
+	}
 
-    private verifyIndexIsValid(index: number) {
-        let activePlayers = this.getActiveSpecPlayers();
-        if (index < 0 || index > activePlayers.length) {
-            return false;
-        }
-        return true;
-    }
+	public startGame() {
+		if (this.room.getScores()) {
+			this.room.pauseGame(false);
+		} else {
+			this.room.startGame();
+		}
+	}
 
-    private updateTeamCaptains(): void {
-        this.teamCaptains = this.teamControl.getCaptains();
-    }
+	public stopGame() {
+		if (this.room.getScores()) {
+			this.room.pauseGame(true);
+		} else {
+			this.room.stopGame();
+		}
+	}
+
+	public defineRoomSituation() {
+		const totalPlayers = this.getTotalPlayers();
+		this.isValidChoose =
+			totalPlayers.length > CONSTANTS.MAX_PLAYERS_IN_MATCH;
+		this.isValidMatch =
+			teamInMemory.getTotalPlayers() === CONSTANTS.MAX_PLAYERS_IN_MATCH;
+	}
+
+	public restartarGame() {
+		this.room.stopGame();
+		this.room.startGame();
+	}
 }

@@ -17,26 +17,10 @@ export class TeamControl {
 	}
 
 	public autoAddPlayers(playersInQueue: Array<PlayerObject>): void {
-		let numberForEachTeam = 0;
-		let totalPlayers = 0;
-
-		if (playersInQueue.length % 2 === 0) {
-			numberForEachTeam = playersInQueue.length / 2;
-			totalPlayers = numberForEachTeam * 2;
-		} else if (playersInQueue.length === 1) {
-			totalPlayers = 1;
-		} else {
-			numberForEachTeam = (playersInQueue.length - 1) / 2;
-			totalPlayers = numberForEachTeam * 2;
-		}
-
-		for (let index = 0; index < totalPlayers; index++) {
-			const playerId = playersInQueue[index].id;
+		for (const player of playersInQueue) {
+			const id = player.id;
 			const numberTeam = this.teamRepository.verifyPreferenceTeam();
-			this.movePlayerForTeam(playerId, numberTeam);
-			if (playersInQueue.length === 1) {
-				break;
-			}
+			this.movePlayerForTeam(id, numberTeam);
 		}
 	}
 

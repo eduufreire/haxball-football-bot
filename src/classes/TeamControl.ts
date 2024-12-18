@@ -17,30 +17,14 @@ export class TeamControl {
 	}
 
 	public autoAddPlayers(playersInQueue: Array<PlayerObject>): void {
-		let numberForEachTeam = 0;
-		let totalPlayers = 0;
-
-		if (playersInQueue.length % 2 === 0) {
-			numberForEachTeam = playersInQueue.length / 2;
-			totalPlayers = numberForEachTeam * 2;
-		} else if (playersInQueue.length === 1) {
-			totalPlayers = 1;
-		} else {
-			numberForEachTeam = (playersInQueue.length - 1) / 2;
-			totalPlayers = numberForEachTeam * 2;
-		}
-
-		for (let index = 0; index < totalPlayers; index++) {
-			const playerId = playersInQueue[index].id;
+		for (const player of playersInQueue) {
+			const id = player.id;
 			const numberTeam = this.teamRepository.verifyPreferenceTeam();
-			this.movePlayerForTeam(playerId, numberTeam);
-			if (playersInQueue.length === 1) {
-				break;
-			}
+			this.movePlayerForTeam(id, numberTeam);
 		}
 	}
 
-	public autoRemovePlayers(): void {
+	public  autoRemovePlayers(): void {
 		const lengthTeamRed = this.teamRepository.getLengthTeam(1);
 		const lengthTeamBlue = this.teamRepository.getLengthTeam(2);
 		let playerId = 0;
@@ -76,10 +60,11 @@ export class TeamControl {
 			: CONSTANTS.TEAMS.BLUE_NUMBER;
 	}
 
+	// ALTERAR AQUI
 	public neededPlayersInMatch(): boolean {
 		return (
 			this.teamRepository.getTotalPlayers() <
-			CONSTANTS.MAX_PLAYERS_IN_MATCH
+			CONSTANTS.MAX_PLAYERS_IN_MATCH 
 		);
 	}
 }

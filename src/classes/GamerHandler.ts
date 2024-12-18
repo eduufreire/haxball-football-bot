@@ -1,9 +1,8 @@
-import { Handler } from "../interface/Handler";
 import { TEAM, teamInMemory } from "../repository/TeamsInMemory";
 import { CONSTANTS } from "../utils/constants";
 import { TeamControl } from "./TeamControl";
 
-export class GameHandler implements Handler {
+export class GameHandler {
 	public isValidChoose = false;
 	public isChoiceMode = false;
 	private isValidMatch = false;
@@ -11,62 +10,50 @@ export class GameHandler implements Handler {
 	constructor(
 		private room: RoomObject,
 		private teamControl: TeamControl,
-	) {}
+	) { }
 
-	public handler(): void {
-		const spectators = this.getActiveSpectatorsPlayers();
-		const isNeededPlayer = this.teamControl.neededPlayersInMatch();
-		const MAX_PLAYERS = CONSTANTS.MAX_PLAYERS_IN_MATCH;
+	public balanceTeams() {
+		setTimeout(() => {
+			const totalPlayers = this.getTotalPlayers();
+			if (totalPlayers.length <= CONSTANTS.MAX_PLAYERS_IN_MATCH) {
+				const spectators = this.getActiveSpectatorsPlayers();
+				let lastIndexAdd =
+					spectators.length % 2 === 0
+						? spectators.length
+						: spectators.length - 1;
 
-		if (isNeededPlayer && !this.isValidChoose) {
-			if (
-				teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
-				(this.getTotalPlayers().length % 2 === 0 ||
-					this.getTotalPlayers().length <
-						CONSTANTS.MIN_PLAYERS_IN_MATCH)
-			) {
-				this.teamControl.autoAddPlayers(spectators);
+				lastIndexAdd =
+					totalPlayers.length <= CONSTANTS.MIN_PLAYERS_IN_MATCH &&
+					lastIndexAdd === 0
+						? 1
+						: lastIndexAdd;
+
+				const filteredPlayers = spectators.slice(0, lastIndexAdd);
+				this.teamControl.autoAddPlayers(filteredPlayers);
+
+				setTimeout(() => {
+					if (
+						teamInMemory.getTotalPlayers() ===
+						CONSTANTS.MAX_PLAYERS_IN_MATCH
+					) {
+						this.restartarGame();
+					}
+				}, 1000);
 			}
-
-			if (
-				teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
-				!this.isValidMatch
-			) {
-				this.restartarGame();
-			}
-			// if (
-			// 	teamInMemory.getTotalPlayers() <= MAX_PLAYERS &&
-			// 	(this.getTotalPlayers().length % 2 === 0 ||
-			// 		this.getTotalPlayers().length <
-			// 			CONSTANTS.MIN_PLAYERS_IN_MATCH)
-			// ) {
-			// 	this.teamControl.autoAddPlayers(spectators);
-
-			// 	if (
-			// 		teamInMemory.getTotalPlayers() === MAX_PLAYERS &&
-			// 		!this.isValidMatch
-			// 	) {
-			// 		this.restartarGame();
-			// 	}
-			// }
-		}
-
-		if (isNeededPlayer && this.isValidChoose) {
-			this.stopGame();
-			this.isChoiceMode = true;
-		}
-
-		this.defineRoomSituation();
+		}, 500);
 	}
 
 	public handlerVictory(numberTeamWin: TEAM) {
-		let spectators: PlayerObject[];
 		if (this.getTotalPlayers().length <= CONSTANTS.MAX_PLAYERS_IN_MATCH) {
-			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
 			this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
+			this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
+			setTimeout(() => {
+				this.balanceTeams();
+			}, 1000);
+
 			setTimeout(() => {
 				this.restartarGame();
-			}, 1000);
+			}, 2000);
 		} else {
 			if (numberTeamWin === TEAM.BLUE) {
 				this.teamControl.changeAllPlayers(TEAM.RED, TEAM.SPEC);
@@ -75,9 +62,10 @@ export class GameHandler implements Handler {
 				this.teamControl.changeAllPlayers(TEAM.BLUE, TEAM.SPEC);
 			}
 
+			const spectators = this.getActiveSpectatorsPlayers();
+			this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
+
 			setTimeout(() => {
-				spectators = this.getActiveSpectatorsPlayers();
-				this.teamControl.movePlayerForTeam(spectators[0].id, TEAM.BLUE);
 				this.showSpectatorsPlayerForChoice();
 			}, 1000);
 		}
@@ -85,15 +73,20 @@ export class GameHandler implements Handler {
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
 		this.defineRoomSituation();
-
 		if (player.team !== 0) {
 			this.teamControl.removePlayerTeam(player.id, player.team);
 
+			if (this.teamControl.neededPlayersInMatch() && this.getTotalPlayers().length > CONSTANTS.MAX_PLAYERS_IN_MATCH) {
+				this.showSpectatorsPlayerForChoice();
+				return;
+			}
+
 			if (
-				teamInMemory.getTotalPlayers() % 2 !== 0 &&
-				this.getActiveSpectatorsPlayers().length === 0
+				this.getTotalPlayers().length <= CONSTANTS.MAX_PLAYERS_IN_MATCH
 			) {
+				console.log('entrou aqui')
 				this.teamControl.autoRemovePlayers();
+				return;
 			}
 		}
 	}
@@ -134,8 +127,7 @@ export class GameHandler implements Handler {
 	public showSpectatorsPlayerForChoice() {
 		const spectators = this.getActiveSpectatorsPlayers();
 
-		let message =
-			"Digite o NÚMERO do jogador OU !rand / !top / !bottom \n\n";
+		let message = "Digite o NÚMERO do jogador para escolhê-lo\n";
 		message += "Jogadores disponíveis para escolha: \n";
 
 		spectators.forEach((player, index) => {
@@ -181,10 +173,15 @@ export class GameHandler implements Handler {
 
 	public defineRoomSituation() {
 		const totalPlayers = this.getTotalPlayers();
-		this.isValidChoose =
-			totalPlayers.length > CONSTANTS.MAX_PLAYERS_IN_MATCH;
+		this.isChoiceMode =
+			totalPlayers.length > CONSTANTS.MAX_PLAYERS_IN_MATCH &&
+			this.teamControl.neededPlayersInMatch();
 		this.isValidMatch =
 			teamInMemory.getTotalPlayers() === CONSTANTS.MAX_PLAYERS_IN_MATCH;
+
+		if (this.isChoiceMode) {
+			this.stopGame();
+		}
 	}
 
 	public restartarGame() {

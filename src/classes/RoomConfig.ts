@@ -18,7 +18,7 @@ export class RoomConfig {
 
 	private static configRoom(): void {
 		RoomConfig.room.setScoreLimit(1);
-		RoomConfig.room.setTimeLimit(3);
+		RoomConfig.room.setTimeLimit(2);
 		RoomConfig.room.setCustomStadium(JSON.stringify(mainStadium));
 		RoomConfig.room.setTeamsLock(true);
 	}

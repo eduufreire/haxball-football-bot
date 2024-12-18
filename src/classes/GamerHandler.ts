@@ -10,7 +10,7 @@ export class GameHandler {
 	constructor(
 		private room: RoomObject,
 		private teamControl: TeamControl,
-	) {}
+	) { }
 
 	public balanceTeams() {
 		setTimeout(() => {
@@ -76,7 +76,7 @@ export class GameHandler {
 		if (player.team !== 0) {
 			this.teamControl.removePlayerTeam(player.id, player.team);
 
-			if (this.teamControl.neededPlayersInMatch() && this.isValidMatch) {
+			if (this.teamControl.neededPlayersInMatch() && this.getTotalPlayers().length > CONSTANTS.MAX_PLAYERS_IN_MATCH) {
 				this.showSpectatorsPlayerForChoice();
 				return;
 			}
@@ -84,6 +84,7 @@ export class GameHandler {
 			if (
 				this.getTotalPlayers().length <= CONSTANTS.MAX_PLAYERS_IN_MATCH
 			) {
+				console.log('entrou aqui')
 				this.teamControl.autoRemovePlayers();
 				return;
 			}

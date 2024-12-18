@@ -40,6 +40,7 @@ export default class RoomEvents {
 		};
 
 		room.onPlayerChat = (player, msg) => {
+			// TODO: refactor here: create a function to verify if a player is chosen as the captain of the team
 			const isCaptain =
 				player.id === teamInMemory.getCaptainTeam(1) ||
 				player.id === teamInMemory.getCaptainTeam(2);

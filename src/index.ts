@@ -5,7 +5,7 @@ import RoomEvents from "./classes/RoomEvents";
 
 HaxballJS.then((HBInit) => {
 	const room = HBInit({
-		roomName: "BOT DE MERDA DA ONÇA PINTUDA",
+		roomName: "FUTURO X4 - TESTANDO BOT",
 		playerName: "criador do haxball 2.0",
 		maxPlayers: 16,
 		public: false,

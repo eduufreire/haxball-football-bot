@@ -1,4 +1,4 @@
-import { GLOBALS } from "./config";
+import { CONFIG } from "./config";
 import HaxballJS from "haxball.js";
 import { RoomConfig } from "./classes/RoomConfig";
 import RoomEvents from "./classes/RoomEvents";
@@ -10,7 +10,7 @@ HaxballJS.then((HBInit) => {
 		maxPlayers: 16,
 		public: false,
 		noPlayer: false,
-		token: GLOBALS.TOKEN,
+		token: CONFIG.TOKEN,
 	});
 	
 	RoomConfig.setRoom(room);

@@ -1,6 +1,5 @@
 import { teamInMemory } from "../repository/TeamsInMemory";
 import { GameHandler } from "./GamerHandler";
-import { RoomConfig } from "./RoomConfig";
 import { TeamControl } from "./TeamControl";
 
 export default class RoomEvents {
@@ -14,12 +13,18 @@ export default class RoomEvents {
 			console.log(link);
 			room.startGame();
 			setInterval(() => {
-				gameHandler.defineRoomSituation()
-			}, 1000)
+				gameHandler.defineRoomSituation();
+			}, 1000);
 		};
 
 		room.onPlayerJoin = (player: PlayerObject) => {
-			room.sendAnnouncement(".................BOT EM FASE DE TESTE, PODE CONTER VÁRIOS BUGS...............", player.id, 0x8f77bd, "bold", 1)
+			room.sendAnnouncement(
+				".................BOT EM FASE DE TESTE, PODE CONTER VÁRIOS BUGS...............",
+				player.id,
+				0x8f77bd,
+				"bold",
+				1,
+			);
 			gameHandler.balanceTeams();
 		};
 
@@ -30,15 +35,14 @@ export default class RoomEvents {
 
 		room.onTeamVictory = (scores: ScoresObject) => {
 			setTimeout(() => {
-				room.stopGame()
+				room.stopGame();
 				if (scores.blue > scores.red) {
 					gameHandler.handlerVictory(2);
 				} else {
 					gameHandler.handlerVictory(1);
 				}
-			}, 2000)
+			}, 2000);
 		};
-
 		room.onPlayerChat = (player, msg) => {
 			// TODO: refactor here: create a function to verify if a player is chosen as the captain of the team
 			const isCaptain =
@@ -67,7 +71,6 @@ export default class RoomEvents {
 		};
 	}
 }
-
 
 function verifyMessageIsNumber(msg: string) {
 	const regex = /^[0-9]{1,}$/;

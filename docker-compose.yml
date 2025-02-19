@@ -1,0 +1,6 @@
+services:
+  database:
+    image: jitesoft/sqlite
+    container_name: banco_hax
+    ports:
+      - "8191:8191"

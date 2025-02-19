@@ -1,4 +1,4 @@
-import { CONSTANTS } from "../utils/constants";
+import { CONFIG } from "../config";
 import {
 	TEAM,
 	teamInMemory,
@@ -24,7 +24,7 @@ export class TeamControl {
 		}
 	}
 
-	public  autoRemovePlayers(): void {
+	public autoRemovePlayers(): void {
 		const lengthTeamRed = this.teamRepository.getLengthTeam(1);
 		const lengthTeamBlue = this.teamRepository.getLengthTeam(2);
 		let playerId = 0;
@@ -56,15 +56,14 @@ export class TeamControl {
 		const lengthTeamRed = this.teamRepository.getLengthTeam(1);
 		const lengthTeamBlue = this.teamRepository.getLengthTeam(2);
 		return lengthTeamRed <= lengthTeamBlue
-			? CONSTANTS.TEAMS.RED_NUMBER
-			: CONSTANTS.TEAMS.BLUE_NUMBER;
+			? CONFIG.TEAMS.RED_NUMBER
+			: CONFIG.TEAMS.BLUE_NUMBER;
 	}
 
 	// ALTERAR AQUI
 	public neededPlayersInMatch(): boolean {
 		return (
-			this.teamRepository.getTotalPlayers() <
-			CONSTANTS.MAX_PLAYERS_IN_MATCH 
+			this.teamRepository.getTotalPlayers() < CONFIG.MAX_PLAYERS_IN_MATCH
 		);
 	}
 }

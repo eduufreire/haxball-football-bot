@@ -21,14 +21,16 @@ export class GameHandler {
 					spectators.length % 2 === 0
 						? spectators.length
 						: spectators.length - 1;
+				console.log(lastIndexAdd);
 
 				lastIndexAdd =
-					totalPlayers.length <= CONFIG.MIN_PLAYERS_IN_MATCH &&
 					lastIndexAdd === 0
 						? 1
 						: lastIndexAdd;
+				console.log(lastIndexAdd);
 
 				const filteredPlayers = spectators.slice(0, lastIndexAdd);
+				console.log(filteredPlayers);
 				this.teamControl.autoAddPlayers(filteredPlayers);
 
 				setTimeout(() => {
@@ -79,7 +81,7 @@ export class GameHandler {
 				return;
 			}
 
-			if (this.getTotalPlayers().length <= CONFIG.MAX_PLAYERS_IN_MATCH) {
+			if (this.getTotalPlayers().length < CONFIG.MAX_PLAYERS_IN_MATCH) {
 				this.teamControl.autoRemovePlayers();
 				return;
 			}
@@ -139,7 +141,7 @@ export class GameHandler {
 	}
 
 	public getTotalPlayers(): Array<PlayerObject> {
-		return this.room.getPlayerList().filter((p) => p.id !== 0);
+		return this.room.getPlayerList().filter((p) => p.id !== 0 && p.id !== 1);
 	}
 
 	public getActiveSpectatorsPlayers(): Array<PlayerObject> {
@@ -182,7 +184,7 @@ export class GameHandler {
 	public restartarGame() {
 		if (
 			teamInMemory.getTotalPlayers() === CONFIG.MAX_PLAYERS_IN_MATCH &&
-			this.room.getScores().time <= 15
+			(!this.room.getScores() || this.room.getScores().time <= 15)
 		) {
 			this.room.stopGame();
 			this.room.startGame();

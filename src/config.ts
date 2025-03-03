@@ -1,10 +1,17 @@
 export const CONFIG = {
-	TOKEN: "thr1.AAAAAGezUIh_ywS-6YPgEg.RgiUeVDpCIw",
+	TOKEN: "thr1.AAAAAGfGCGgg83Hez99RSw.yzZu7nFCmiE",
 	MIN_PLAYERS_IN_MATCH: 2,
-	MAX_PLAYERS_IN_MATCH: 6,
+	MAX_PLAYERS_IN_MATCH: 4,
 	TEAMS: {
 		SPEC: 0,
 		RED_NUMBER: 1,
 		BLUE_NUMBER: 2,
 	},
+	ROOM: {
+		NAME: "TESTANDO BOT - ONÇA PINTUDA",
+		BOT_NAME: "criador do haxball 2.0",
+		SHOW_BOT: false,
+		MAX_PLAYERS: 16,
+		IS_PUBLIC: false,
+	}
 };

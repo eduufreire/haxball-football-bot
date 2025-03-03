@@ -18,3 +18,6 @@ npm i && npm run start
 - colocar emoji em quem fez gol e assitencia
 
 
+bot ta colocando desproporcional, ex: 2 em campo quando entra, entra 1 pro time
+quando alguem sai do red, n aparece a mensagem pra escohler
+bugado quando move

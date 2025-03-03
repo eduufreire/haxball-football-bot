@@ -8,7 +8,7 @@ type TeamsObject = {
 export enum TEAM {
 	RED = 1,
 	BLUE = 2,
-	SPEC = 0
+	SPEC = 0,
 }
 
 export interface TeamRepository {
@@ -19,7 +19,7 @@ export interface TeamRepository {
 	getCaptainTeam(numberTeam: TEAM): number;
 	getLengthTeam(numberTeam: TEAM): number;
 	getTotalPlayers(): number;
-	verifyPreferenceTeam(): TEAM
+	verifyPreferenceTeam(): TEAM;
 }
 
 class TeamsInMemory implements TeamRepository {
@@ -61,7 +61,7 @@ class TeamsInMemory implements TeamRepository {
 		const LAST_INDEX = 1;
 		if (numberTeam === TEAM.RED) {
 			return this.teamRed.players.splice(LAST_INDEX, 1)[0];
-		} 
+		}
 		return this.teamBlue.players.splice(LAST_INDEX, 1)[0];
 	}
 
@@ -72,10 +72,10 @@ class TeamsInMemory implements TeamRepository {
 	}
 
 	public removeAllPlayers(numberTeam: TEAM): Array<number> {
-		if(numberTeam === TEAM.RED) {
-			return this.teamRed.players.splice(0, 4)
+		if (numberTeam === TEAM.RED) {
+			return this.teamRed.players.splice(0, 4);
 		}
-		return this.teamBlue.players.splice(0, 4)
+		return this.teamBlue.players.splice(0, 4);
 	}
 
 	public getCaptainTeam(numberTeam: TEAM): number {
@@ -94,6 +94,17 @@ class TeamsInMemory implements TeamRepository {
 
 	public getTotalPlayers(): number {
 		return this.getLengthTeam(TEAM.RED) + this.getLengthTeam(TEAM.BLUE);
+	}
+
+	public teste(idPlayer: number): void {
+		this.teamRed.players.filter((id) => idPlayer === id);
+	}
+
+	public getPlayers(team: TEAM) {
+		if (team === TEAM.RED) {
+			return this.teamRed.players;
+		}
+		return this.teamBlue.players;
 	}
 }
 

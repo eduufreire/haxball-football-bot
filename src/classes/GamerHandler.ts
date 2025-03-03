@@ -3,9 +3,9 @@ import { CONFIG } from "../config";
 import { TeamControl } from "./TeamControl";
 
 export class GameHandler {
-	public isValidChoose = false;
-	public isChoiceMode = false;
+	public isChoiceModePossible = false;
 	private isValidMatch = false;
+	private isPaused = false;
 
 	constructor(
 		private room: RoomObject,
@@ -21,16 +21,13 @@ export class GameHandler {
 					spectators.length % 2 === 0
 						? spectators.length
 						: spectators.length - 1;
-				console.log(lastIndexAdd);
 
-				lastIndexAdd =
-					lastIndexAdd === 0
-						? 1
-						: lastIndexAdd;
-				console.log(lastIndexAdd);
+				const quantidadeImpar = teamInMemory.getTotalPlayers() % 2;
+				if (lastIndexAdd === 0 && (quantidadeImpar !== 0 || teamInMemory.getTotalPlayers() === 0)) {
+					lastIndexAdd = 1;
+				}
 
 				const filteredPlayers = spectators.slice(0, lastIndexAdd);
-				console.log(filteredPlayers);
 				this.teamControl.autoAddPlayers(filteredPlayers);
 
 				setTimeout(() => {
@@ -69,14 +66,11 @@ export class GameHandler {
 	}
 
 	public controlAfterPlayerLeft(player: PlayerObject) {
-		this.defineRoomSituation();
 		if (player.team !== 0) {
 			this.teamControl.removePlayerTeam(player.id, player.team);
+			this.defineRoomSituation();
 
-			if (
-				this.teamControl.neededPlayersInMatch() &&
-				this.getTotalPlayers().length > CONFIG.MAX_PLAYERS_IN_MATCH
-			) {
+			if (this.isChoiceModePossible) {
 				this.showSpectatorsPlayerForChoice();
 				return;
 			}
@@ -116,8 +110,15 @@ export class GameHandler {
 		if (isNeededPlayer) {
 			this.showSpectatorsPlayerForChoice();
 		} else {
-			this.isChoiceMode = false;
+			this.isChoiceModePossible = false;
 			this.startGame();
+		}
+	}
+
+	public hasShowPlayers() {
+		if (this.isChoiceModePossible) {
+			this.showSpectatorsPlayerForChoice();
+			return;
 		}
 	}
 
@@ -141,7 +142,7 @@ export class GameHandler {
 	}
 
 	public getTotalPlayers(): Array<PlayerObject> {
-		return this.room.getPlayerList().filter((p) => p.id !== 0 && p.id !== 1);
+		return this.room.getPlayerList().filter((p) => p.id !== 0);
 	}
 
 	public getActiveSpectatorsPlayers(): Array<PlayerObject> {
@@ -149,12 +150,13 @@ export class GameHandler {
 	}
 
 	public verifyIsChoiceMode(): boolean {
-		return this.isChoiceMode;
+		return this.isChoiceModePossible;
 	}
 
 	public startGame() {
 		if (this.room.getScores()) {
 			this.room.pauseGame(false);
+			this.isPaused = false
 		} else {
 			this.room.startGame();
 		}
@@ -163,6 +165,7 @@ export class GameHandler {
 	public stopGame() {
 		if (this.room.getScores()) {
 			this.room.pauseGame(true);
+			this.isPaused = true
 		} else {
 			this.room.stopGame();
 		}
@@ -170,14 +173,18 @@ export class GameHandler {
 
 	public defineRoomSituation() {
 		const totalPlayers = this.getTotalPlayers();
-		this.isChoiceMode =
+		this.isChoiceModePossible =
 			totalPlayers.length > CONFIG.MAX_PLAYERS_IN_MATCH &&
 			this.teamControl.neededPlayersInMatch();
 		this.isValidMatch =
 			teamInMemory.getTotalPlayers() === CONFIG.MAX_PLAYERS_IN_MATCH;
 
-		if (this.isChoiceMode) {
+		if (this.isChoiceModePossible) {
 			this.stopGame();
+		}
+
+		if(this.isValidMatch && this.isPaused) {
+			this.startGame();
 		}
 	}
 

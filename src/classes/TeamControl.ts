@@ -52,12 +52,47 @@ export class TeamControl {
 		this.teamRepository.removePlayerTeam(idPlayer, numberTeam);
 	}
 
+	public autoReorganizeTeams(team: TEAM) {
+		const playersWithoutSpecs = this.room
+			.getPlayerList()
+			.filter((p) => p.team !== 0);
+
+		const playersInTeam = playersWithoutSpecs
+			.filter((p) => p.team === team)
+			.map((p) => p.id);
+
+		const playersInMemory = teamInMemory.getPlayers(team);
+
+		for (const id of playersInMemory) {
+			const result = playersInTeam.includes(id);
+			if (!result) {
+				this.removePlayerTeam(id, team);
+			}
+		}
+
+		for (const id of playersInTeam) {
+			const result = playersInMemory.includes(id);
+			if (!result) {
+				this.movePlayerForTeam(id, team);
+			}
+		}
+
+		console.log(this.teamRepository.getTotalPlayers());
+	}
+
 	public verifyCaptainWithPreferenceChoice(): number {
 		const lengthTeamRed = this.teamRepository.getLengthTeam(1);
 		const lengthTeamBlue = this.teamRepository.getLengthTeam(2);
 		return lengthTeamRed <= lengthTeamBlue
 			? CONFIG.TEAMS.RED_NUMBER
 			: CONFIG.TEAMS.BLUE_NUMBER;
+	}
+
+	public verifyIsCaptain(id: number): boolean {
+		return (
+			id === this.teamRepository.getCaptainTeam(1) ||
+			id === this.teamRepository.getCaptainTeam(2)
+		);
 	}
 
 	// ALTERAR AQUI

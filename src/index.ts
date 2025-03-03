@@ -5,14 +5,14 @@ import RoomEvents from "./classes/RoomEvents";
 
 HaxballJS.then((HBInit) => {
 	const room = HBInit({
-		roomName: "TESTANDO BOOOOOOT ---- ONÇA PINTUDA",
-		playerName: "criador do haxball 2.0",
-		maxPlayers: 16,
-		public: true,
-		noPlayer: false,
+		roomName: CONFIG.ROOM.NAME,
+		playerName: CONFIG.ROOM.BOT_NAME,
+		maxPlayers: CONFIG.ROOM.MAX_PLAYERS,
+		public: CONFIG.ROOM.IS_PUBLIC,
+		noPlayer: CONFIG.ROOM.SHOW_BOT,
 		token: CONFIG.TOKEN,
 	});
-	
+
 	RoomConfig.setRoom(room);
-	RoomEvents.listenEvents(room)
+	RoomEvents.listenEvents(room);
 });

@@ -1,5 +1,5 @@
 export const CONFIG = {
-	TOKEN: "thr1.AAAAAGfGCGgg83Hez99RSw.yzZu7nFCmiE",
+	TOKEN: "thr1.AAAAAGfHR2xt3aXkybG1xQ.M_6tCZSTQ-c",
 	MIN_PLAYERS_IN_MATCH: 2,
 	MAX_PLAYERS_IN_MATCH: 4,
 	TEAMS: {

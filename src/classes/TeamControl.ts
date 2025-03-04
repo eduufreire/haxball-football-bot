@@ -61,7 +61,7 @@ export class TeamControl {
 			.filter((p) => p.team === team)
 			.map((p) => p.id);
 
-		const playersInMemory = teamInMemory.getPlayers(team);
+		const playersInMemory = this.getPlayers(team);
 
 		for (const id of playersInMemory) {
 			const result = playersInTeam.includes(id);
@@ -76,8 +76,6 @@ export class TeamControl {
 				this.movePlayerForTeam(id, team);
 			}
 		}
-
-		console.log(this.teamRepository.getTotalPlayers());
 	}
 
 	public verifyCaptainWithPreferenceChoice(): number {
@@ -93,6 +91,10 @@ export class TeamControl {
 			id === this.teamRepository.getCaptainTeam(1) ||
 			id === this.teamRepository.getCaptainTeam(2)
 		);
+	}
+
+	public getPlayers(team: TEAM) {
+		return teamInMemory.getPlayers(team);
 	}
 
 	// ALTERAR AQUI

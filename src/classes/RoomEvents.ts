@@ -1,3 +1,4 @@
+import { CONFIG } from "../config";
 import { TEAM, teamInMemory } from "../repository/TeamsInMemory";
 import Commons from "../utils/commons";
 import { GameHandler } from "./GamerHandler";
@@ -21,10 +22,11 @@ export default class RoomEvents {
 		room.onRoomLink = (link: string) => {
 			console.log(link);
 			room.startGame();
-			setInterval(() => {
-				gameHandler.defineRoomSituation();
-			}, 500);
 		};
+
+		room.onGameTick = () => {
+			gameHandler.defineRoomSituation();
+		}
 
 		room.onPlayerJoin = (player: PlayerObject) => {
 			playerControl.initializerPlayer(player);
@@ -51,10 +53,26 @@ export default class RoomEvents {
 		room.onTeamVictory = (scores: ScoresObject) => {
 			setTimeout(() => {
 				room.stopGame();
+				let losers = [];
+				let winners = [];
 				if (scores.blue > scores.red) {
+					losers = teamControl.getPlayers(CONFIG.TEAMS.RED_NUMBER);
+					winners = teamControl.getPlayers(CONFIG.TEAMS.BLUE_NUMBER);
 					gameHandler.handlerVictory(2);
 				} else {
+					losers = teamControl.getPlayers(CONFIG.TEAMS.BLUE_NUMBER);
+					winners = teamControl.getPlayers(CONFIG.TEAMS.RED_NUMBER);
 					gameHandler.handlerVictory(1);
+				}
+
+				for (const element of losers) {
+					playerControl.updateStats(element,"defeats");
+					playerControl.updateStats(element,"matches");
+				}
+
+				for (const element of winners) {
+					playerControl.updateStats(element,"victories");
+					playerControl.updateStats(element,"matches");
 				}
 			}, 2000);
 		};
@@ -85,28 +103,49 @@ export default class RoomEvents {
 				playerTeam: teamPlayerGoal,
 				name: nameGoal,
 			} = lastsPlayerBallKick[0];
-			const {
-				id: idPlayerAssistence,
-				playerTeam: teamPlayerAssistence,
-				name: nameAssistence,
-			} = lastsPlayerBallKick[1];
+			const time = Commons.formaterTimer(room.getScores().time);
+			let messageAnnouncementGoal = "";
 
 			if (team === teamPlayerGoal) {
 				playerControl.updateStats(idPlayerGoal, "goals");
+				messageAnnouncementGoal = `[${time}] >> ⚽ GOL ${nameGoal}`;
 
-				if (
-					team === teamPlayerAssistence &&
-					idPlayerAssistence !== idPlayerGoal
-				) {
-					playerControl.updateStats(
-						idPlayerAssistence,
-						"assistences",
-					);
+				if (lastsPlayerBallKick[1]) {
+					const {
+						id: idPlayerAssistence,
+						playerTeam: teamPlayerAssistence,
+						name: nameAssistence,
+					} = lastsPlayerBallKick[1];
+
+					if (
+						team === teamPlayerAssistence &&
+						idPlayerAssistence !== idPlayerGoal
+					) {
+						playerControl.updateStats(
+							idPlayerAssistence,
+							"assistences",
+						);
+						messageAnnouncementGoal += ` | 🤝 Assitência milimétrica: ${nameAssistence}`;
+					}
 				}
-
-				const message = `Gol feito por: ${nameGoal}`;
-				room.sendAnnouncement(message, undefined, 0xfffff, "bold", 2);
+				room.sendAnnouncement(
+					messageAnnouncementGoal,
+					undefined,
+					0xeaf272,
+					"bold",
+					2,
+				);
+				return;
 			}
+
+			messageAnnouncementGoal = `[${time}] >> ⚽❌ GOL CONTRA ${nameGoal}`;
+			room.sendAnnouncement(
+				messageAnnouncementGoal,
+				undefined,
+				0xeaf272,
+				"bold",
+				2,
+			);
 		};
 
 		room.onPlayerChat = (player, msg) => {

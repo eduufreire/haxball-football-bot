@@ -48,8 +48,6 @@ export default class PlayerControl {
 		}
 
 		this.playersInMemory.set(player.id, player);
-
-		console.log(player);
 	}
 
 	public saveAndRemovePlayersStats(id: number) {
@@ -59,7 +57,6 @@ export default class PlayerControl {
 			console.log("atualizando no banco");
 			this.playersInMemory.delete(id);
 		}
-		console.log(this.playersInMemory);
 	}
 
 	public updateStats(id: number, stats: FieldsStats) {

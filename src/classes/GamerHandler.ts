@@ -23,7 +23,11 @@ export class GameHandler {
 						: spectators.length - 1;
 
 				const quantidadeImpar = teamInMemory.getTotalPlayers() % 2;
-				if (lastIndexAdd === 0 && (quantidadeImpar !== 0 || teamInMemory.getTotalPlayers() === 0)) {
+				if (
+					lastIndexAdd === 0 &&
+					(quantidadeImpar !== 0 ||
+						teamInMemory.getTotalPlayers() === 0)
+				) {
 					lastIndexAdd = 1;
 				}
 
@@ -46,7 +50,8 @@ export class GameHandler {
 			}, 1000);
 
 			setTimeout(() => {
-				this.restartarGame();
+				this.room.stopGame();
+				this.room.startGame();
 			}, 2000);
 		} else {
 			if (numberTeamWin === TEAM.BLUE) {
@@ -156,7 +161,7 @@ export class GameHandler {
 	public startGame() {
 		if (this.room.getScores()) {
 			this.room.pauseGame(false);
-			this.isPaused = false
+			this.isPaused = false;
 		} else {
 			this.room.startGame();
 		}
@@ -165,7 +170,7 @@ export class GameHandler {
 	public stopGame() {
 		if (this.room.getScores()) {
 			this.room.pauseGame(true);
-			this.isPaused = true
+			this.isPaused = true;
 		} else {
 			this.room.stopGame();
 		}
@@ -183,7 +188,7 @@ export class GameHandler {
 			this.stopGame();
 		}
 
-		if(this.isValidMatch && this.isPaused) {
+		if (this.isValidMatch && this.isPaused) {
 			this.startGame();
 		}
 	}

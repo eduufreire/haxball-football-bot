@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  idDatabase Int @id @default(autoincrement())
+  idInGame Int @unique
+  auth String @unique
+  nickname String
+  isAdmin Boolean @default(false)
+
+  seasonStatus SeasonStatus[]
+}
+
+model Season {
+  idSeason Int @id @default(autoincrement())
+  season String
+  
+  seasonStatus SeasonStatus[]
+}
+
+model SeasonStatus {
+  id Int @id @default(autoincrement())
+  goals Int
+  assistences Int
+  wins Int
+  defeats Int
+  matches Int
+
+  fkUser Int
+  fkSeason Int
+
+  users User @relation(fields: [fkUser], references: [idDatabase])
+  seasons Season @relation(fields: [fkSeason], references: [idSeason])
+}

@@ -1,3 +1,5 @@
+import { StatsPrisma, UpdateDTO } from "../repository/StatsRepository";
+
 type Stats = {
 	goals: number;
 	assistences: number;
@@ -21,14 +23,14 @@ interface PlayerEntity {
 	seasonStats: Stats;
 	allStats: Stats;
 	// isAdmin: boolean;
-	// isAFK: boolean;
-	// celebrateGoal: string
 }
 
 export default class PlayerControl {
+	constructor(private statsRepository = new StatsPrisma()) {}
+
 	private playersInMemory: Map<number, PlayerEntity> = new Map();
 
-	public initializerPlayer(args: PlayerObject) {
+	public async initializerPlayer(args: PlayerObject) {
 		const player: PlayerEntity = {
 			id: args.id,
 			name: args.name,
@@ -37,24 +39,49 @@ export default class PlayerControl {
 			allStats: this.getStatsReseted(),
 		};
 
-		// as duas opções abaixo servem para ir no banco de dados e verificar se possuem dados do player n temp
-		// ou em todo o histórico
 		if (player.id !== 0) {
-			player.seasonStats = this.getStatsReseted();
-		}
+			const result = await this.statsRepository.getStatsPlayer(
+				player.auth,
+			);
 
-		if (player.id !== 0) {
-			player.allStats = this.getStatsReseted();
+			if (!result) {
+				await this.statsRepository.save(
+					player.id,
+					player.name,
+					player.auth,
+				);
+			}
+
+			if (result.seasonStatus.length > 0) {
+				player.seasonStats = result.seasonStatus[0];
+			}
 		}
 
 		this.playersInMemory.set(player.id, player);
 	}
 
-	public saveAndRemovePlayersStats(id: number) {
+	public async updateAndRemovePlayersStats(id: number) {
 		const player = this.playersInMemory.get(id);
 		if (player) {
-			// atualizar no banco de dados
-			console.log("atualizando no banco");
+			const { seasonStatus } = await this.statsRepository.getStatsPlayer(
+				player.auth,
+			);
+
+			if (seasonStatus.length < 0) {
+				console.log("Pinto mole");
+			} else {
+				const flamengo: UpdateDTO = {
+					id: seasonStatus[0].id,
+					...player.seasonStats,
+				};
+
+				console.log(flamengo);
+
+				const teste = await this.statsRepository.updateStats(flamengo);
+
+				console.log(teste);
+			}
+
 			this.playersInMemory.delete(id);
 		}
 	}
@@ -64,7 +91,6 @@ export default class PlayerControl {
 		if (player) {
 			player.seasonStats[stats] += 1;
 		}
-		console.log(this.playersInMemory);
 	}
 
 	private getStatsReseted() {

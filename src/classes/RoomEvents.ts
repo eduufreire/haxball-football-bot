@@ -26,7 +26,7 @@ export default class RoomEvents {
 
 		room.onGameTick = () => {
 			gameHandler.defineRoomSituation();
-		}
+		};
 
 		room.onPlayerJoin = (player: PlayerObject) => {
 			playerControl.initializerPlayer(player);
@@ -44,7 +44,7 @@ export default class RoomEvents {
 		};
 
 		room.onPlayerLeave = (player: PlayerObject) => {
-			playerControl.saveAndRemovePlayersStats(player.id);
+			playerControl.updateAndRemovePlayersStats(player.id);
 			gameHandler.hasShowPlayers();
 			gameHandler.controlAfterPlayerLeft(player);
 			gameHandler.balanceTeams();
@@ -66,13 +66,13 @@ export default class RoomEvents {
 				}
 
 				for (const element of losers) {
-					playerControl.updateStats(element,"defeats");
-					playerControl.updateStats(element,"matches");
+					playerControl.updateStats(element, "defeats");
+					playerControl.updateStats(element, "matches");
 				}
 
 				for (const element of winners) {
-					playerControl.updateStats(element,"victories");
-					playerControl.updateStats(element,"matches");
+					playerControl.updateStats(element, "victories");
+					playerControl.updateStats(element, "matches");
 				}
 			}, 2000);
 		};
@@ -172,6 +172,7 @@ export default class RoomEvents {
 				room.setPlayerAdmin(player.id, true);
 				return false;
 			}
+
 			return true;
 		};
 	}
